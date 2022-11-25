@@ -8,3 +8,4 @@ const InviteSchema = new Schema({
         type: Schema.Types.ObjectId,
     },
 })
+module.exports = mongoose.model("InviteModel", InviteSchema);

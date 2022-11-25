@@ -1,4 +1,8 @@
-const mongoose = require("mongoose");
+const {mongoose, Schema} = require("mongoose");
+const validator = require('validator');
+const bcrypt = require('bcryptjs');
+
+const GENDER = ['male', 'female'];
 
 const UserSchema = new mongoose.Schema(
   {
@@ -47,15 +51,39 @@ const UserSchema = new mongoose.Schema(
     status: {
       type: Number,
       required: true,
-      default: CustomerStatus.ACTIVE,
     },
+    serverIds: {
+      type: [Schema.Types.ObjectId],
+      ref: 'Server',
+      default: [],
+    }
   },
   {
-    collection: "customers",
+    collection: "users",
     timestamps: true,
     strict: true,
   }
 );
+
+
+// ENCRYPT PASSWORD BEFORE SAVING TO DB
+UserSchema.pre('save', async function (next) {
+  // Only run if password is modified
+  if (!this.isModified('password')) return next();
+
+  // Hash the password with cost of 12
+  this.password = await bcrypt.hash(this.password, 12);
+
+  next();
+});
+
+// INSTANCE METHOD: Check password to login
+UserSchema.methods.correctPassword = async function (
+  candidatePassword,
+  userPassword
+) {
+  return await bcrypt.compare(candidatePassword, userPassword);
+};
 
 const UserModel = mongoose.model("user", UserSchema)
 module.exports = UserModel
