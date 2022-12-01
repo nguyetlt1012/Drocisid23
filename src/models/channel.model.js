@@ -6,10 +6,21 @@ const ChannelSchema = new Schema({
     type: String,
     require: true,
   },
+  description: {
+    type: String,
+  },
+  isPrivate: {
+    type: Boolean,
+    default: false,
+  },
   userIds: {
     type: [Schema.Types.ObjectId],
     ref: 'User',
     default: [],
+  },
+  role_group: {
+    type: Array,
+    default: []
   },
   type:{
     type: String,
@@ -19,9 +30,9 @@ const ChannelSchema = new Schema({
         throw new Error('Invalid type channel');
     }
   },
-  serverId: {
-    type: Schema.Types.ObjectId,
-    ref: 'Server'
+  //user cant join channel from invite link unless they belong to this server
+  inviteLinkIds: {
+    type: Array,
   }
 },{
   timestamps: true,

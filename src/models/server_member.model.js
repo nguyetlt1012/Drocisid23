@@ -20,4 +20,5 @@ const ServerMemberSchema = new Schema({
 },{
   timestamps: true,
 });
-module.exports = mongoose.model("ServerMemberModel", ServerMemberSchema);
+const ServerMemberModel = new mongoose.model('server_member', ServerMemberSchema)
+module.exports = ServerMemberModel
