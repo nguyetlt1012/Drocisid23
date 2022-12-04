@@ -1,0 +1,5 @@
+const InviteController = {
+    createInvite: async () => {
+        
+    }
+}
