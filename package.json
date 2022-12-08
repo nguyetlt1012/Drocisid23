@@ -1,31 +1,31 @@
 {
-  "name": "drocsid23-backend",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon src/index.js"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+ssh://git@gitlab.com/soict-it4409/20221/group23/drocsid23-backend.git"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://gitlab.com/soict-it4409/20221/group23/drocsid23-backend/issues"
-  },
-  "homepage": "https://gitlab.com/soict-it4409/20221/group23/drocsid23-backend#readme",
-  "dependencies": {
-    "bcrypt": "^5.1.0",
-    "bcryptjs": "^2.4.3",
-    "dotenv": "^16.0.3",
-    "express": "^4.18.2",
-    "jsonwebtoken": "^8.5.1",
-    "mongoose": "^6.7.3",
-    "nodemon": "^2.0.20",
-    "validator": "^13.7.0"
-  }
+    "name": "drocsid23-backend",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "start": "nodemon src/index.js"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+ssh://git@gitlab.com/soict-it4409/20221/group23/drocsid23-backend.git"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "bugs": {
+        "url": "https://gitlab.com/soict-it4409/20221/group23/drocsid23-backend/issues"
+    },
+    "homepage": "https://gitlab.com/soict-it4409/20221/group23/drocsid23-backend#readme",
+    "dependencies": {
+        "bcrypt": "^5.1.0",
+        "bcryptjs": "^2.4.3",
+        "dotenv": "^16.0.3",
+        "express": "^4.18.2",
+        "jsonwebtoken": "^8.5.1",
+        "mongoose": "^6.7.3",
+        "nodemon": "^2.0.20",
+        "validator": "^13.7.0"
+    }
 }

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 const mongoose = require("mongoose");
 
 const mongoConnect =  (db) => {
@@ -11,4 +12,14 @@ const mongoConnect =  (db) => {
 
 module.exports = {
   mongoConnect
+=======
+const mongoose = require('mongoose');
+
+const mongoConnect = async () => {
+    return mongoose.connect(process.env.MONGODB_URI);
+};
+
+module.exports = {
+    mongoConnect,
+>>>>>>> nguyet
 };

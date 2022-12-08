@@ -1,9 +1,10 @@
-const ServerController = require('../controllers/server.controller')
 const router = require('express').Router();
+const authController = require('../controllers/auth.controller');
+const serverController = require('../controllers/server.controller');
 
+router.use(authController.protect);
 
-router.post('server', validateInput, ServerController.createServer)
+// router.get('/', serverController.getAllServer);
+router.post('/create', serverController.create);
 
-
-
-module.exports = router
+module.exports = router;
