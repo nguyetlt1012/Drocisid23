@@ -1,4 +1,4 @@
-const {mongoose, Schema} = require("mongoose");
+const { mongoose, Schema } = require('mongoose');
 const validator = require('validator');
 const bcrypt = require('bcryptjs');
 
@@ -12,8 +12,7 @@ const UserSchema = new mongoose.Schema(
       unique: true,
       dropDups: true,
       validate(value) {
-        if (!validator.isEmail(value))
-          throw new Error(`Invalid Email: ${value}`);
+        if (!validator.isEmail(value)) throw new Error(`Invalid Email: ${value}`);
       },
     },
     fullname: {
@@ -25,8 +24,7 @@ const UserSchema = new mongoose.Schema(
       type: String,
       required: true,
       validate(value) {
-        if (!GENDER.includes(value))
-          throw new Error(`Invalid gender: ${value}`);
+        if (!GENDER.includes(value)) throw new Error(`Invalid gender: ${value}`);
       },
     },
     phone: {
@@ -35,8 +33,7 @@ const UserSchema = new mongoose.Schema(
       unique: true,
       dropDups: true,
       validate(value) {
-        if (!validator.isMobilePhone(value, "vi-VN"))
-          throw new Error(`Invalid phone number: ${value}`);
+        if (!validator.isMobilePhone(value, 'vi-VN')) throw new Error(`Invalid phone number: ${value}`);
       },
     },
     password: {
@@ -46,7 +43,7 @@ const UserSchema = new mongoose.Schema(
     },
     avatarUrl: {
       type: String,
-      default: "avt_default.png",
+      default: 'avt_default.png',
     },
     status: {
       type: Number,
@@ -56,15 +53,14 @@ const UserSchema = new mongoose.Schema(
       type: [Schema.Types.ObjectId],
       ref: 'Server',
       default: [],
-    }
+    },
   },
   {
-    collection: "users",
+    collection: 'users',
     timestamps: true,
     strict: true,
-  }
+  },
 );
-
 
 // ENCRYPT PASSWORD BEFORE SAVING TO DB
 UserSchema.pre('save', async function (next) {
@@ -78,12 +74,9 @@ UserSchema.pre('save', async function (next) {
 });
 
 // INSTANCE METHOD: Check password to login
-UserSchema.methods.correctPassword = async function (
-  candidatePassword,
-  userPassword
-) {
+UserSchema.methods.correctPassword = async function (candidatePassword, userPassword) {
   return await bcrypt.compare(candidatePassword, userPassword);
 };
 
-const UserModel = mongoose.model("user", UserSchema)
-module.exports = UserModel
+const UserModel = mongoose.model('user', UserSchema);
+module.exports = UserModel;
