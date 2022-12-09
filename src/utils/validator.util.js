@@ -1,7 +1,8 @@
 const ValidatorUtil = {
-    validatorInput: (input) => {
+    validatorInput: (req) => {
+        
         return true
-    }
+    },
 }
 
 module.exports = {
