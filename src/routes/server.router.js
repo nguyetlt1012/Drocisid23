@@ -6,5 +6,5 @@ router.use(authController.protect);
 
 // router.get('/', serverController.getAllServer);
 router.post('/create', serverController.create);
-
+router.post('/', serverController.get);
 module.exports = router;

@@ -18,40 +18,51 @@ exports.create = catchAsync(async (req, res, next) => {
     return next(new AppError('Invalid user', 400));
   }
 
-  const newServer = await Server.create(req.body);
+  const server = await Server.create(req.body);
 
-  user.serverIds.push(newServer._id);
+  user.serverIds.push(server._id);
   await user.save();
 
   // create serverRoleGroup: owner, everyone
   await ServerRoleGroup.create({
     name: 'everyone',
     rolePolicies: serverPolicy.defaultPolicyEveryone,
-    serverId: newServer._id,
+    serverId: server._id,
   });
   const adminRole = await ServerRoleGroup.create({
     name: 'admin',
     rolePolicies: serverPolicy.defaultPolicyAdmin,
-    serverId: newServer._id,
+    serverId: server._id,
   });
 
   // create userServeRole for owner
   const userServerRole = await UserServerRole.create({
-    serverId: newServer._id,
+    serverId: server._id,
     userId: user._id,
     serverRoleGroupId: adminRole._id,
   });
-  const channel = await Channel.create({ name: 'Chung', type: 'text', serverId: newServer._id });
+  const channel = await Channel.create({ name: 'Chung', type: 'text', serverId: server._id });
 
   user.password = undefined;
   res.status(200).json({
     status: 'success',
     data: {
-      newServer,
+      server,
       user,
       channel,
       adminRole,
       userServerRole,
+    },
+  });
+});
+
+exports.get = catchAsync(async (req, res, next) => {
+  const server = await Server.findOne({ __id: req.body.id });
+
+  res.status(200).json({
+    status: 'success',
+    data: {
+      server,
     },
   });
 });
