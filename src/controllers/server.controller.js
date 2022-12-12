@@ -29,6 +29,7 @@ exports.create = catchAsync(async (req, res, next) => {
     rolePolicies: serverPolicy.defaultPolicyEveryone,
     serverId: server._id,
   });
+
   const adminRole = await ServerRoleGroup.create({
     name: 'admin',
     rolePolicies: serverPolicy.defaultPolicyAdmin,

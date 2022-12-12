@@ -1,10 +1,9 @@
 const router = require('express').Router();
-const authController = require('../controllers/auth.controller');
 const serverController = require('../controllers/server.controller');
+const Authen = require('../middleware/authen.middleware');
 
-router.use(authController.protect);
 
 // router.get('/', serverController.getAllServer);
-router.post('/create', serverController.create);
-router.post('/', serverController.get);
+router.post('/create', Authen.verifyToken,  serverController.create);
+router.post('/', Authen.verifyToken, serverController.get);
 module.exports = router;
