@@ -1,10 +1,11 @@
 const Response = {
-    _resp: (res, apiStatus, httpStatus, data) => {
+    _resp: (res, httpStatus, apiStatus, message, data) => {
         return res.status(httpStatus).json({
             apiStatus,
-            data
-        })
-    }
-}
+            message,
+            data,
+        });
+    },
+};
 
-module.export = Response
+module.exports = Response._resp;

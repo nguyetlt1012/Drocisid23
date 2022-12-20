@@ -1,6 +1,5 @@
-const { httpStatus } = require('../constant');
 const InviteService = require('../service/')
-const { validatorInput } = require('../utils/validator.util')
+const validatorInput = require('../utils/validator.util')
 
 const InviteController = {
     createInvite: async (req, res, next) => {

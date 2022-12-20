@@ -1,9 +1,9 @@
 class CusError extends Error {
     constructor(apiStatus, httpStatus, message) {
+        super(message)
         this.apiStatus = apiStatus
         this.httpStatus = httpStatus
-        this.message = message
     }
 }
 
-module.export = CusError
+module.exports = CusError

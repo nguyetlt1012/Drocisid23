@@ -11,6 +11,9 @@ const serverPolicy = {
 };
 const defaultPolicyEveryone = [serverPolicy.CREATE_MESSAGE, serverPolicy.VIEW_CHANNEL];
 const defaultPolicyAdmin = [serverPolicy.MANAGE_CHANNEL, serverPolicy.MANAGE_ROLE, serverPolicy.MANAGE_MESSAGE];
-exports.defaultPolicyEveryone = defaultPolicyEveryone;
-exports.defaultPolicyAdmin = defaultPolicyAdmin;
-module.export = serverPolicy
+
+module.exports = {
+  defaultPolicyEveryone,
+  defaultPolicyAdmin,
+  serverPolicy,
+};
