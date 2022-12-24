@@ -1,44 +1,12 @@
-const User = require('../models/user.model');
-const catchAsync = require('../utils/catchAsync');
 const jwt = require('jsonwebtoken');
-const AppError = require('../utils/appError');
 const bcrypt = require('bcryptjs');
 const _resp = require('../response/response');
 const CusError = require('../error/error');
 const userService = require('../service/user.service');
-// const httpStatus = require('../constant/HttpStatus');
 const { httpStatus, apiStatus, messageResponse } = require('../constant/index');
-const { promisify } = require('util');
 const { validate } = require('../utils/validator.util');
 
 
-/**
- * @desc PROTECT ROUTES: All routes after this route need to login to access
- */
-exports.protect = catchAsync(async (req, res, next) => {
-    // 1) Get token and check
-    let token;
-    if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
-        token = req.headers.authorization.split(' ')[1];
-    } else if (req.cookies?.jwt) {
-        token = req.cookies.jwt;
-    }
-
-    if (!token) return next(new AppError('You are not logged in yet. Please login to access!', 401));
-
-    // 2) Verification token
-    const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
-
-    // 3) Check if user still exists
-    const currentUser = await User.findOne({ _id: decoded.id });
-    if (!currentUser) return next(new AppError('The user belong to the token no longer exist!', 401));
-
-    // Put user on req
-    req.user = currentUser;
-
-    // Grant access for routes
-    next();
-});
 
 const signToken = (id) => {
     return jwt.sign({ id }, process.env.JWT_SECRET, {
@@ -112,4 +80,5 @@ const AuthController = {
         }
     },
 };
+
 module.exports = AuthController;
