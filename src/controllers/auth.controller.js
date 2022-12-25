@@ -5,7 +5,9 @@ const CusError = require('../error/error');
 const userService = require('../service/user.service');
 const { httpStatus, apiStatus, messageResponse } = require('../constant/index');
 const { validate } = require('../utils/validator.util');
-
+const validator = require('validator');
+const Email = require('../utils/email');
+const { promisify } = require('util');
 
 
 const signToken = (id) => {
@@ -16,12 +18,7 @@ const signToken = (id) => {
 
 const createSendToken = (data, res) => {
     const token = signToken(data._id);
-    const cookieOptions = {
-        expires: new Date(Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000),
-        httpOnly: true,
-    };
     data.password = undefined;
-    res.cookie('jwt', token, cookieOptions);
     _resp(res, httpStatus.OK, apiStatus.SUCCESS, messageResponse.SUCCESS, {data, token});
 };
 
@@ -79,6 +76,60 @@ const AuthController = {
             }
         }
     },
+    forgotPassword: async(req, res, next) =>{
+        try {
+            const email = req.body.email;
+            if (!validator.isEmail(email)){
+                throw new CusError(apiStatus.INVALID_PARAM, httpStatus.BAD_REQUEST, "Invalid email");
+            }
+
+            const user = await userService.getByEmail(email);
+            if (!user) {
+                throw new CusError(apiStatus.AUTH_ERROR, httpStatus.BAD_REQUEST, 'Not found email');
+            }
+            // should send email
+            const resetToken = await signToken(user.id);
+            const url = `${process.env.CLIENT_URL}/reset-password${resetToken}`;
+            
+            await new Email(user, url).sendPasswordReset();
+
+            _resp(res, httpStatus.OK, apiStatus.SUCCESS, messageResponse.SUCCESS, {message: "Token send to your email"});
+
+        } catch (error) {
+            if (error instanceof CusError) {
+                _resp(res, error.httpStatus, error.apiStatus, error.message, {});
+            } else {
+                _resp(res, httpStatus.INTERNAL_SERVER_ERROR, apiStatus.OTHER_ERROR, error.message, {});
+            }
+        }
+    },
+    resetPassword: async (req, res, next) =>{
+        try {
+            // console.log(req.query);
+            const decode = await promisify(jwt.verify)(req.query.token, process.env.JWT_SECRET);
+            if (!decode){
+                throw new CusError(apiStatus.AUTH_ERROR, httpStatus.BAD_REQUEST, 'Token is invalid');
+            }
+
+            const {email, password} = req.body;
+            if (!validator.isEmail(email)){
+                throw new CusError(apiStatus.INVALID_PARAM, httpStatus.BAD_REQUEST, "Invalid email");
+            }
+
+            const user = await userService.resetPassword(email, password, decode.id);
+            if (user.status == 'Err') {
+                throw new CusError(apiStatus.DATABASE_ERROR, httpStatus.OK, user.message);
+            }
+
+            createSendToken(user, res);
+        } catch (error) {
+            if (error instanceof CusError) {
+                _resp(res, error.httpStatus, error.apiStatus, error.message, {});
+            } else {
+                _resp(res, httpStatus.INTERNAL_SERVER_ERROR, apiStatus.OTHER_ERROR, error.message, {});
+            }
+        }
+    }
 };
 
 module.exports = AuthController;

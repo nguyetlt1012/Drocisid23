@@ -9,11 +9,5 @@ const serverPolicy = {
   VIEW_CHANNEL: 6,
   MANAGE_MESSAGE: 7,
 };
-const defaultPolicyEveryone = [serverPolicy.CREATE_MESSAGE, serverPolicy.VIEW_CHANNEL];
-const defaultPolicyAdmin = [serverPolicy.MANAGE_CHANNEL, serverPolicy.MANAGE_ROLE, serverPolicy.MANAGE_MESSAGE];
 
-module.exports = {
-  defaultPolicyEveryone,
-  defaultPolicyAdmin,
-  serverPolicy,
-};
+module.exports = serverPolicy

@@ -19,8 +19,28 @@ const UserService = {
         try {
             const user = await User.findOne({ email });
             return user;
-        } catch (error) {}
+        } catch (error) {
+            return {
+                status: 'Err',
+                message: error.message,
+            };
+        }
     },
+    resetPassword: async (email, password, userId) => {
+        try{
+           const user = await User.findOne({_id: userId, email: email});
+           if (!user) throw new Error('Can not find user by email');
+           user.password = await bcrypt.hash(password, 12); 
+           await user.save({ validateBeforeSave: false });
+           user.password = undefined;
+           return user;
+        }catch(error){
+            return {
+                status: 'Err',
+                message: error.message,
+            };
+        }
+    }
 };
 
 module.exports = UserService;

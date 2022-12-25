@@ -4,6 +4,7 @@ const CusError = require('../error/error');
 const _resp = require('../response/response');
 const { promisify } = require('util');
 const jwt = require("jsonwebtoken");
+const UserModel = require("../models/user.model");
 
 const Authen = {
     verifyToken: async (req, res, next) => {
@@ -14,11 +15,12 @@ const Authen = {
             const token = (bearerToken && bearerToken.split(' ')[1]) || req?.cookies.jwt;
             if (!token) throw new CusError(apiStatus.AUTH_ERROR, httpStatus.UNAUTHORIZED, `Invalid token`);
             
-            const user = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
-            if (!user)
+            const decode = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
+            const currentUser = await UserModel.findOne({_id: decode.id})
+            if (!currentUser)
                 throw new CusError(apiStatus.AUTH_ERROR, httpStatus.UNAUTHORIZED, 'Cant get customer from token');
             
-            req.userId = user.id;
+            req.body.userId = currentUser.id;
             next();
         } catch (error) {
             if (error instanceof CusError) {

@@ -1,6 +1,6 @@
 const { mongoose, Schema } = require('mongoose');
 const validator = require('validator');
-const bcrypt = require('bcryptjs');
+
 
 const GENDER = ['male', 'female'];
 
