@@ -1,5 +1,6 @@
 const User = require('../models/user.model');
 const bcrypt = require('bcryptjs');
+const { ERR, OK } = require('../constant');
 
 const UserService = {
     create: async (user) => {
@@ -7,10 +8,13 @@ const UserService = {
             user.password = await bcrypt.hash(user.password, 12);
             const newUser = await User.create(user);
             newUser.password = undefined;
-            return newUser;
+            return {
+                status: OK,
+                data: newUser
+            };
         } catch (error) {
             return {
-                status: 'Err',
+                status: ERR,
                 message: error.message,
             };
         }
