@@ -1,13 +1,15 @@
+const { OK, ERR } = require("../constant/index")
+
 const InviteService = {
-    createService: async(owner, expire, source, type) => {
+    create: async(owner, expire, source, type) => {
         try {
          return {
-            status: 'Success',
+            status: OK,
             data: {}
          }   
         } catch (error) {
             return {
-                status: 'Err',
+                status: ERR,
                 data: error.message
             }
         }

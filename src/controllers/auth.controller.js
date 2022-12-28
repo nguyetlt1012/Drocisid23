@@ -26,12 +26,12 @@ const AuthController = {
     signup: async (req, res, next) => {
         try {
             const valid = await validate.checkParamRequest(req, ['fullname', 'email', 'phone', 'gender', 'password']);
-            if (valid.status == 'Err') {
+            if (valid.status == ERR) {
                 throw new CusError(apiStatus.INVALID_PARAM, httpStatus.BAD_REQUEST, valid.message);
             }
 
             const data = await userService.create(req.body);
-            if (data.status == 'Err') {
+            if (data.status == ERR) {
                 throw new CusError(apiStatus.DATABASE_ERROR, httpStatus.OK, data.message);
             }
 

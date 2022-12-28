@@ -11,7 +11,6 @@ const Authen = {
         try {
             const bearerToken = req.headers.authorization;
             if (bearerToken === undefined || !bearerToken.startsWith('Bearer ')) throw new Error(`Invalid Token`);
-
             const token = (bearerToken && bearerToken.split(' ')[1]) || req?.cookies.jwt;
             if (!token) throw new CusError(apiStatus.AUTH_ERROR, httpStatus.UNAUTHORIZED, `Invalid token`);
             
