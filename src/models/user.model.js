@@ -47,7 +47,6 @@ const UserSchema = new mongoose.Schema(
     },
     status: {
       type: Number,
-      required: true,
     },
     serverIds: {
       type: [Schema.Types.ObjectId],
