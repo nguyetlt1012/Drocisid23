@@ -19,6 +19,7 @@ const InviteController = {
                 source: req.body.source,
                 inviteType: req.body.source,
             })
+            // inviteLink: /invite/code
             if(response.status === ERR){
                 throw new CusError(apiStatus.DATABASE_ERROR, httpStatus.INTERNAL_SERVER_ERROR, response.message);
             }
@@ -31,6 +32,13 @@ const InviteController = {
             else {
                 _resp(res, httpStatus.INTERNAL_SERVER_ERROR, apiStatus.OTHER_ERROR, error.message)
             }
+        }
+    },
+    joinWithLink: async (req, res, next) => {
+        try {
+            
+        } catch (error) {
+            
         }
     }
 }

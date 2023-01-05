@@ -8,7 +8,7 @@ const ChannelController= {
     create: async (req, res, next) =>{
         try {
             const valid = await validate.checkParamRequest(req, ['name', 'type']);
-            if (valid.status == 'Err') {
+            if (valid.status == ERR) {
                 throw new CusError(apiStatus.INVALID_PARAM, httpStatus.BAD_REQUEST, valid.message);
             }
 

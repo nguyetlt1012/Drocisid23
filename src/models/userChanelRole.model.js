@@ -18,5 +18,5 @@ const UserChannelRoleSchema = new Schema(
   },
 );
 
-const UserChannelRoleModel = new mongoose.model('UserChannelRole', UserChannelRoleSchema);
+const UserChannelRoleModel =  mongoose.model('UserChannelRole', UserChannelRoleSchema);
 module.exports = UserChannelRoleModel;

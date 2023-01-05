@@ -22,5 +22,5 @@ const UserServerRoleSchema = new Schema(
     timestamps: true,
   },
 );
-const UserServerRoleModel = new mongoose.model('UserServerRole', UserServerRoleSchema);
+const UserServerRoleModel =  mongoose.model('UserServerRole', UserServerRoleSchema);
 module.exports = UserServerRoleModel;

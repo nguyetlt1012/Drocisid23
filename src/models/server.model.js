@@ -23,6 +23,11 @@ const ServerSchema = new Schema(
     inviteLinkIds: {
       type: Schema.Types.Array,
     },
+    memberIDs: {
+      type: Schema.Types.Array,
+      ref: 'User',
+      require: true,
+    },
     requestJoinUsers: {
       type: Array,
     },
@@ -31,5 +36,5 @@ const ServerSchema = new Schema(
     timestamps: true,
   },
 );
-const ServerModel = new mongoose.model('Server', ServerSchema);
+const ServerModel = mongoose.model('Server', ServerSchema);
 module.exports = ServerModel;

@@ -17,5 +17,5 @@ const ChannelRoleGroupSchema = new Schema(
   },
 );
 
-const ChannelRoleGroupModel = new mongoose.model('ChannelRoleGroup', ChannelRoleGroupSchema);
+const ChannelRoleGroupModel = mongoose.model('ChannelRoleGroup', ChannelRoleGroupSchema);
 module.exports = ChannelRoleGroupModel;

@@ -25,7 +25,8 @@ const Authen = {
             if (!currentUser)
                 throw new CusError(apiStatus.AUTH_ERROR, httpStatus.UNAUTHORIZED, 'Cant get customer from token');
             
-            req.body.userId = currentUser.id;
+            req.userId = currentUser.id;
+            req.admin = true;
             next();
         } catch (error) {
             if (error instanceof CusError) {
@@ -75,5 +76,6 @@ const Authen = {
         }
     }
 };
+
 
 module.exports = Authen;

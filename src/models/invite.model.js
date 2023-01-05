@@ -2,7 +2,7 @@ const { Schema, default: mongoose } = require('mongoose');
 
 const InviteSchema = new Schema(
   {
-    inviteLink: {
+    inviteCode: {
       type: String,
     },
     createBy: {
@@ -11,6 +11,7 @@ const InviteSchema = new Schema(
     },
 
     //unit: minute
+    // if expireTime == 0 is never expire
     expireTime: {
       type: Date,
       require: true,
@@ -32,5 +33,5 @@ const InviteSchema = new Schema(
     timestamps: true,
   },
 );
-const InviteModel = new mongoose.model('Invite', InviteSchema);
+const InviteModel = mongoose.model('Invite', InviteSchema);
 module.exports = InviteModel;

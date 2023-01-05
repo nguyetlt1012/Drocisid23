@@ -25,7 +25,7 @@ const UserService = {
             return user;
         } catch (error) {
             return {
-                status: 'Err',
+                status: ERR,
                 message: error.message,
             };
         }
@@ -40,7 +40,7 @@ const UserService = {
            return user;
         }catch(error){
             return {
-                status: 'Err',
+                status: ERR,
                 message: error.message,
             };
         }

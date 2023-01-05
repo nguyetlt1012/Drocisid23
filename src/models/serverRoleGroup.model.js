@@ -17,5 +17,5 @@ const ServerRoleGroupSchema = new Schema(
   },
 );
 
-const ServerRoleGroupModel = new mongoose.model('ServerRoleGroup', ServerRoleGroupSchema);
+const ServerRoleGroupModel = mongoose.model('ServerRoleGroup', ServerRoleGroupSchema);
 module.exports = ServerRoleGroupModel;

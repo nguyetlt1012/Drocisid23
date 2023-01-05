@@ -1,4 +1,4 @@
-const { mongoose, Schema } = require('mongoose');
+const { default: mongoose, Schema } = require('mongoose');
 const validator = require('validator');
 
 

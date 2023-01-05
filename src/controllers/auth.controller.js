@@ -3,7 +3,7 @@ const bcrypt = require('bcryptjs');
 const _resp = require('../response/response');
 const CusError = require('../error/error');
 const userService = require('../service/user.service');
-const { httpStatus, apiStatus, messageResponse } = require('../constant/index');
+const { httpStatus, apiStatus, messageResponse, OK, ERR } = require('../constant/index');
 const { validate } = require('../utils/validator.util');
 const validator = require('validator');
 const Email = require('../utils/email');
@@ -18,7 +18,6 @@ const signToken = (id) => {
 
 const createSendToken = (data, res) => {
     const token = signToken(data._id);
-    data.password = undefined;
     _resp(res, httpStatus.OK, apiStatus.SUCCESS, messageResponse.SUCCESS, {data, token});
 };
 
@@ -47,7 +46,7 @@ const AuthController = {
     login: async (req, res, next) => {
         try {
             const valid = await validate.checkParamRequest(req, ['email', 'password']);
-            if (valid.status == 'Err') {
+            if (valid.status == ERR) {
                 throw new CusError(apiStatus.INVALID_PARAM, httpStatus.BAD_REQUEST, valid.message);
             }
 
@@ -66,7 +65,9 @@ const AuthController = {
                     'Your account has been blocked for some reasons. Please contact us for supports or create a new account',
                 );
             
-            createSendToken(data, res);
+            createSendToken({
+                serverIds: data.serverIds,
+            }, res);
 
         } catch (error) {
             if (error instanceof CusError) {
@@ -117,7 +118,7 @@ const AuthController = {
             }
 
             const user = await userService.resetPassword(email, password, decode.id);
-            if (user.status == 'Err') {
+            if (user.status == ERR) {
                 throw new CusError(apiStatus.DATABASE_ERROR, httpStatus.OK, user.message);
             }
 
