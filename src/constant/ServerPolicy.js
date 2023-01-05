@@ -5,9 +5,8 @@ const serverPolicy = {
   MANAGE_ROLE: 2,
   CREATE_INVITE: 3,
   CREATE_MESSAGE: 4,
-  DELETE_MESSAGE: 5,
+  MANAGE_MESSAGE: 5, // user can pin, delete message 
   VIEW_CHANNEL: 6,
-  MANAGE_MESSAGE: 7,
 };
 
 module.exports = serverPolicy

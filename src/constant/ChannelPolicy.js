@@ -15,7 +15,8 @@ const channelPolicy = {
   CREATE_MESSAGE: 4,
 
   //User can modify their message
-  UPDATE_MESSAGE: 5,
+  MANAGE_MESSAGE: 5,
+  VIEW_CHANNEL: 6,
 };
 
 module.exports = channelPolicy;
