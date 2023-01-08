@@ -37,6 +37,7 @@ const ChannelSchema = new Schema(
     serverId: {
       type: Schema.Types.ObjectId,
       ref: 'Server',
+      require: true
     },
   },
   {

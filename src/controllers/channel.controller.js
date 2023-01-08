@@ -11,9 +11,11 @@ const ChannelController= {
             if (valid.status == ERR) {
                 throw new CusError(apiStatus.INVALID_PARAM, httpStatus.BAD_REQUEST, valid.message);
             }
-
+            req.body.userId = req.userId;
             const channel = await channelService.create(req.body);
-            _resp(res, httpStatus.OK, apiStatus.SUCCESS, channel);
+            if (channel.status == ERR) throw new CusError(apiStatus.DATABASE_ERROR, httpStatus.BAD_REQUEST, channel.message);
+
+            _resp(res, httpStatus.OK, apiStatus.SUCCESS,"create success", channel.data);
         } catch (error) {
             if (error instanceof CusError) {
                 _resp(res, error.httpStatus, error.apiStatus, error.message, {});
@@ -25,7 +27,7 @@ const ChannelController= {
     getAllByServer: async (req, res, next) =>{
         try {
             const channels = await channelService.getAllByServer(req.params.serverId);
-            _resp(res, httpStatus.OK, apiStatus.SUCCESS, channels);
+            _resp(res, httpStatus.OK, apiStatus.SUCCESS, "success", channels);
         } catch (error) {
             if (error instanceof CusError) {
                 _resp(res, error.httpStatus, error.apiStatus, error.message, {});
@@ -41,7 +43,7 @@ const ChannelController= {
             if (response.status == ERR){
                 throw new CusError(apiStatus.OTHER_ERROR, httpStatus.INTERNAL_SERVER_ERROR, response.message)
             }
-            _resp(res, httpStatus.OK, apiStatus.SUCCESS, response.data);
+            _resp(res, httpStatus.OK, apiStatus.SUCCESS, "update success", response.data);
 
         } catch (error) {
             if (error instanceof CusError) {
@@ -55,7 +57,7 @@ const ChannelController= {
         try {
             const channelId = req.params.channelId;
             const response = await channelService.delete(channelId);
-            _resp(res, httpStatus.OK, apiStatus.SUCCESS, response.data);
+            _resp(res, httpStatus.OK, apiStatus.SUCCESS, "delete success", response.data);
 
         } catch (error) {
             if (error instanceof CusError) {
@@ -64,7 +66,8 @@ const ChannelController= {
                 _resp(res, httpStatus.INTERNAL_SERVER_ERROR, apiStatus.OTHER_ERROR, error.message, {});
             }
         }
-    }
+    },
+
 
 }
 module.exports = ChannelController;

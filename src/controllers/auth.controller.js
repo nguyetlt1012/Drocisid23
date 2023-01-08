@@ -66,6 +66,7 @@ const AuthController = {
                 );
             
             createSendToken({
+                _id: data._id,
                 serverIds: data.serverIds,
             }, res);
 

@@ -7,6 +7,7 @@ const ServerService = {
     create: async (ownerId, name, description, isPublic) => {
         try {
             // create newServer on db
+            console.log(ownerId);
             const newServer = await ServerModel.create({
                 ownerId,
                 name,

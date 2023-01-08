@@ -43,8 +43,8 @@ const Authen = {
                 const server = await ServerModel.findOne({_id: serverId});
                 if (!server) throw new CusError(apiStatus.AUTH_ERROR, httpStatus.UNAUTHORIZED, 'Server is invalid');
 
-                if (server.ownerId == req.body.userId) next();
-                const role = await UserServerRoleModel.findOne({serverId: server.id, userId: req.body.userId});
+                if (server.ownerId == req.userId) next();
+                const role = await UserServerRoleModel.findOne({serverId: server.id, userId: req.userId});
                 if (!role) throw new CusError(apiStatus.AUTH_ERROR, httpStatus.UNAUTHORIZED, 'You are not a server member');
 
                 const policyServer = await ServerRoleGroupModel.findOne({_id: role.serverRoleGroupId});
@@ -55,7 +55,7 @@ const Authen = {
                 const channel = await ChannelModel.findOne({_id: channelId});
                 if (!channel) throw new CusError(apiStatus.AUTH_ERROR, httpStatus.UNAUTHORIZED, 'Invalid channel');
 
-                const userRole = await UserChanelRoleModel.findOne({channelId: channel.id, userId: req.body.userId});
+                const userRole = await UserChanelRoleModel.findOne({channelId: channel.id, userId: req.userId});
                 if (userRole){
                     const policyChannel = await ChannelRoleGroupModel.findOne({_id: userRole.channelRoleGroupId});
                     if (policyChannel?.rolePolicies.includes(policy)) next();
