@@ -94,7 +94,7 @@ const AuthController = {
 
             _resp(res, httpStatus.OK, apiStatus.SUCCESS, messageResponse.SUCCESS, {message: "Token send to your email"});
 
-        } catch (error) {
+        } catch (error) { 
             if (error instanceof CusError) {
                 _resp(res, error.httpStatus, error.apiStatus, error.message, {});
             } else {

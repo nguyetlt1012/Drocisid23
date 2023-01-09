@@ -46,7 +46,6 @@ const ChannelRoleGroupService = {
     },
     update: async(roleId, data) =>{
         try {
-            console.log(data)
             const role = await ChannelRoleGroupModel.findByIdAndUpdate(roleId, data, {
                 new: true
             });

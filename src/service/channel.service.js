@@ -2,7 +2,7 @@ const Channel = require('../models/channel.model');
 const Server = require('../models/server.model');
 const UserServerRole = require('../models/userServerRole.model');
 const ServerRoleGroup = require('../models/serverRoleGroup.model');
-const { serverPolicy, ERR, OK } = require('../constant/index');
+const { serverPolicy, ERR, OK, channelPolicy } = require('../constant/index');
 const ChannelRoleGroup = require('../models/channelRoleGroup.model');
 
 const ChannelService = {
@@ -28,10 +28,10 @@ const ChannelService = {
             const newChannel = await Channel.create(channel);
             if (!newChannel) throw new Error("Can't create channel");
 
-            const roleEveryone = await ServerRoleGroup.findOne({serverId: channel.serverId, name: "@everyone"});
-            if (!roleEveryone) throw new Error("Can't find role everyone");
+            // const roleEveryone = await ServerRoleGroup.findOne({serverId: channel.serverId, name: "@everyone"});
+            // if (!roleEveryone) throw new Error("Can't find role everyone");
 
-            const channelRole = await ChannelRoleGroup.create({name: roleEveryone.name, rolePolicies: roleEveryone.rolePolicies, channelId: newChannel._id});
+            const channelRole = await ChannelRoleGroup.create({name: "@everyone", rolePolicies: [channelPolicy.MANAGE_MESSAGE, channelPolicy.VIEW_CHANNEL], channelId: newChannel._id});
             if (!channelRole) throw new Error("Can't create role channel");
 
             return {
@@ -77,6 +77,21 @@ const ChannelService = {
             return {
                 status: OK,
                 data: {}
+            }
+        } catch (error) {
+            return {
+                status: ERR,
+                message: error.message,
+            };
+        }
+    },
+    getById: async(id) =>{
+        try {
+            const channel = await Channel.findById(id);
+            if (!channel) throw new Error("invalid channel");
+            return {
+                status: OK,
+                data: channel
             }
         } catch (error) {
             return {

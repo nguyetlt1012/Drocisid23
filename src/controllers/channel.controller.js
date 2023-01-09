@@ -67,6 +67,24 @@ const ChannelController= {
             }
         }
     },
+    getById: async(req, res, next) =>{
+        try {
+            const channelId = req.params.channelId;
+            if (!channelId) throw new CusError(apiStatus.INVALID_PARAM, httpStatus.BAD_REQUEST, "invalid param");
+            
+            const response = await channelService.getById(channelId);
+            if (response.status == ERR) throw new CusError(apiStatus.DATABASE_ERROR, httpStatus.BAD_REQUEST, response.message);
+
+            _resp(res, httpStatus.OK, apiStatus.SUCCESS," success", response.data);
+
+        } catch (error) {
+            if (error instanceof CusError) {
+                _resp(res, error.httpStatus, error.apiStatus, error.message, {});
+            } else {
+                _resp(res, httpStatus.INTERNAL_SERVER_ERROR, apiStatus.OTHER_ERROR, error.message, {});
+            }
+        }
+    }
 
 
 }

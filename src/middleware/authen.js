@@ -38,35 +38,34 @@ const Authen = {
     },
     verifyPermission: (policy) => async (req, res, next) =>{
         try {
-            const serverId = req.params.serverId || req.body.serverId;
+            const serverId = req.params.serverId || req.body.serverId ;
             if (serverId){
                 const server = await ServerModel.findOne({_id: serverId});
                 if (!server) throw new CusError(apiStatus.AUTH_ERROR, httpStatus.UNAUTHORIZED, 'Server is invalid');
 
-                if (server.ownerId == req.userId) next();
+                if (server.ownerId == req.userId) return next();
                 const role = await UserServerRoleModel.findOne({serverId: server.id, userId: req.userId});
                 if (!role) throw new CusError(apiStatus.AUTH_ERROR, httpStatus.UNAUTHORIZED, 'You are not a server member');
 
                 const policyServer = await ServerRoleGroupModel.findOne({_id: role.serverRoleGroupId});
-                if (policyServer.rolePolicies.includes(policy)) next();
+                if (policyServer.rolePolicies.includes(policy)) return next();
             }
             const channelId = req.body.channelId || req.params.channelId;
             if (channelId){
-                const channel = await ChannelModel.findOne({_id: channelId});
+                const channel = await ChannelModel.findById(channelId);
                 if (!channel) throw new CusError(apiStatus.AUTH_ERROR, httpStatus.UNAUTHORIZED, 'Invalid channel');
 
                 const userRole = await UserChanelRoleModel.findOne({channelId: channel.id, userId: req.userId});
                 if (userRole){
                     const policyChannel = await ChannelRoleGroupModel.findOne({_id: userRole.channelRoleGroupId});
-                    if (policyChannel?.rolePolicies.includes(policy)) next();
+                    if (policyChannel?.rolePolicies.includes(policy)) return next();
                 }
 
                 const policyChannel = await ChannelRoleGroupModel.findOne({channelId: channel.id, name: '@everyone'});
-                if (policyChannel?.rolePolicies.includes(policy)) next();
+                if (policyChannel?.rolePolicies.includes(policy)) return next();
             }
 
-            // throw new CusError(apiStatus.AUTH_ERROR, httpStatus.UNAUTHORIZED, 'Invalid permission');
-            next()
+            _resp(res, httpStatus.UNAUTHORIZED, apiStatus.AUTH_ERROR, 'Invalid permission', {});
         } catch (error) {
             if (error instanceof CusError) {
                 _resp(res, error.httpStatus, error.apiStatus, error.message, {});

@@ -8,7 +8,7 @@ router.get('/getAll/:serverId', Authen.verifyToken, Authen.verifyPermission(serv
 router.post('/create', Authen.verifyToken, ChannelController.create);
 router.put('/update/:channelId', Authen.verifyToken, Authen.verifyPermission(channelPolicy.MANAGE_CHANNEL), ChannelController.update);
 router.delete('/delete/:channelId', Authen.verifyToken, Authen.verifyPermission(channelPolicy.MANAGE_CHANNEL), ChannelController.delete );
-
+router.get('/:channelId', Authen.verifyToken, Authen.verifyPermission(channelPolicy.VIEW_CHANNEL), ChannelController.getById);
 // route role 
 router.post('/role/create', Authen.verifyToken, Authen.verifyPermission(serverPolicy.MANAGE_ROLE), ChannelRoleController.create);
 router.get('/role/:roleId', Authen.verifyToken, ChannelRoleController.getById);
