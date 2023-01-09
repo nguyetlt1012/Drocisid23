@@ -48,7 +48,7 @@ const UserSchema = new mongoose.Schema(
     status: {
       type: Number,
     },
-    serverIds: {
+    requestJoinsServer: {
       type: [Schema.Types.ObjectId],
       ref: 'Server',
       default: [],

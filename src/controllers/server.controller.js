@@ -26,12 +26,16 @@ const ServerController = {
             } else _resp(res, httpStatus.INTERNAL_SERVER_ERROR, apiStatus.OTHER_ERROR, error.message);
         }
     },
-    // using admin call
-    getAllServerJoinedByUser: async (req, res, next) => {
+    getAllServersJoinedByUser: async (req, res, next) => {
         try {
-            const userId = req.params.userId;
-            const response = await ServerService.getAllServerJoinedByUser(userId);
-        } catch (error) {}
+            const {status, data} = await ServerService.getAllServerJoinedByUser(req.userId);
+            if(status === ERR) throw new CusError(apiStatus.DATABASE_ERROR, httpStatus.NOT_FOUND, data)
+            _resp(res, httpStatus.CREATED, apiStatus.SUCCESS, 'Success', data);
+        } catch (error) {
+            if (error instanceof CusError) {
+                _resp(res, error.httpStatus, error.apiStatus, error.message);
+            } else _resp(res, httpStatus.INTERNAL_SERVER_ERROR, apiStatus.OTHER_ERROR, error.message);
+        }
     },
     updateServer: async (req, res, next) => {
         try {
@@ -85,13 +89,20 @@ const ServerController = {
     },
     // accept or deny a user request join
     responseUserRequestJoin: async (req, res, next) => {
-        
-    },
-    getAllRequestsJoin: async (req, res, next) => {
-
-    },
-    getRequestJoin: async (req, res, next) => {
-
+        try {
+            const {userIdRequest, acceptJoin} = req.body
+            let response
+            if(acceptJoin)
+                response =  await ServerService.joinServer(userIdRequest, req.params.serverId)
+            else 
+                response = await ServerService.denyUserRequestJoin(userIdRequest, req.params.serverId)
+            if(response.status === ERR) throw new CusError(apiStatus.INVALID_PARAM, httpStatus.NOT_FOUND, response.data)
+            _resp(res, httpStatus.OK, apiStatus.SUCCESS, `Success!`, response.data);
+        } catch (error) {
+            if (error instanceof CusError) {
+                _resp(res, error.httpStatus, error.apiStatus, error.message);
+            } else _resp(res, httpStatus.INTERNAL_SERVER_ERROR, apiStatus.OTHER_ERROR, error.message);
+        }
     },
     createInviteServer: async (req, res, next) => {
         try {
@@ -100,9 +111,6 @@ const ServerController = {
             if(checkParams.status === ERR) {
                 throw new CusError(apiStatus.INVALID_PARAM, httpStatus.BAD_REQUEST, checkParams.message)
             }
-            //call service
-            console.log(InviteService)
-
             const {status, data} = await InviteService.createInvite(req.userId, req.body.expireTime, req.params.id, 0)
             // inviteLink: /invite/code
             if(status === ERR){
@@ -110,6 +118,23 @@ const ServerController = {
             }
             _resp(res, httpStatus.CREATED, apiStatus.SUCCESS, "SUCCESS", data)
 
+        } catch (error) {
+            if(error instanceof CusError) {
+                _resp(res, error.httpStatus, error.apiStatus, error.message)
+            }
+            else {
+                _resp(res, httpStatus.INTERNAL_SERVER_ERROR, apiStatus.OTHER_ERROR, error.message)
+            }
+        }
+    },
+    kickUser: async (req, res, next) => {
+        try {
+            const userIdKick = req.body.userIdKick
+            const {status, data} = await ServerService.kickUser(userIdKick, req.params.id)
+            if(status === ERR){
+                throw new CusError(apiStatus.DATABASE_ERROR, httpStatus.INTERNAL_SERVER_ERROR, data);
+            }
+            _resp(res, httpStatus.CREATED, apiStatus.SUCCESS, "SUCCESS", data)
         } catch (error) {
             if(error instanceof CusError) {
                 _resp(res, error.httpStatus, error.apiStatus, error.message)

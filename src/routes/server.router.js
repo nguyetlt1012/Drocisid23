@@ -4,6 +4,14 @@ const serverController = require('../controllers/server.controller');
 const Authen = require('../middleware/authen');
 
 
+
+
+router.get('/get-servers-join-user', Authen.verifyToken, serverController.getAllServersJoinedByUser)
+
+
+router.post('/response-user-request/:serverId', Authen.verifyToken, serverController.responseUserRequestJoin)
+
+
 // get-server-public
 router.get('/get-servers-public', serverController.getServersPublic)
 
@@ -19,23 +27,15 @@ router.post('/', Authen.verifyToken,  serverController.createServer);
 // update
 router.put('/:id', Authen.verifyToken, serverController.updateServer);
 
+router.put('/:id/kick-user', Authen.verifyToken, serverController.kickUser)
 // create invite link
 router.post('/create-invite/:id', Authen.verifyToken, Authen.verifyPermission(MANAGE_INVITE), serverController.createInviteServer)
 
-// get all request join
-router.get('/:serverId/get-requests', Authen.verifyToken, Authen.verifyPermission(MANAGE_SERVER), serverController.getAllRequestsJoin)
-
-// get detail request join
-router.get('get-requests/:id', Authen.verifyToken, Authen.verifyPermission(MANAGE_SERVER), serverController.getRequestJoin)
 
 // response request join
-router.post('response-requests/:id', Authen.verifyToken, Authen.verifyPermission(MANAGE_SERVER), serverController.responseUserRequestJoin)
+router.post('/response-requests/:id', Authen.verifyToken, Authen.verifyPermission(MANAGE_SERVER), serverController.responseUserRequestJoin)
 
 
-
-
-// admin api
-// router.get('/get-servers-joined-by-user/:userId', Authen.verifyToken, serverController.getAllServerJoinedByUser);
 
 
 

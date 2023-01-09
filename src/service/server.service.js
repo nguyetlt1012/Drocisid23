@@ -1,3 +1,4 @@
+const { default: mongoose } = require('mongoose');
 const { OK, ERR } = require('../constant/index');
 const ChannelModel = require('../models/channel.model');
 const ServerModel = require('../models/server.model');
@@ -19,19 +20,19 @@ const ServerService = {
             });
             if(!newServer) throw new Error(`Cant create Server`)
             // update field serverIds in user
-            const user =  UserModel.findByIdAndUpdate(ownerId, {
-                $push: {
-                    serverIds: newServer.id
-                }
-            })
+            // const user =  UserModel.findByIdAndUpdate(ownerId, {
+            //     $push: {
+            //         serverIds: newServer.id
+            //     }
+            // })
             // create general Channal
-            const generalChannel =  ChannelModel.create({
+            const generalChannel = await ChannelModel.create({
                 serverId: newServer.id,
                 name: `General`,
                 description: `General channel`,
                 userIds: [ownerId]
             })
-            await Promise.all([user, generalChannel])
+            // await Promise.all([user, generalChannel])
             return {
                 status: OK,
                 data: newServer
@@ -63,7 +64,7 @@ const ServerService = {
     },
     update: async(serverId, description, isPublic) => {
         try {
-            const server =  await ServerModel.updateOne({id: serverId}, {
+            const server =  await ServerModel.findByIdAndUpdate(serverId, {
                 description,
                 isPublic,
             })
@@ -143,40 +144,36 @@ const ServerService = {
             
         }
     },
-    getAllServerJoinedByUser: async (dataReq) => {
+    getAllServerJoinedByUser: async (userId) => {
         try {
+            const serverIds = await ServerModel.find({
+                memberIDs: {
+                    $in: userId
+                }
+            }, {
+                name: 1,
+            })
+            return {
+                status: OK,
+                data: serverIds
+            }
             
         } catch (error) {
-            
+            return {
+                status: ERR,
+                data: error.message
+            }
         }
     },
     joinServer: async (userId, serverId) => {
         try {
             // before join, check if they was member of server
-            const isMember = await ServerModel.findOne({
-                id: serverId,
-                memberIDs: {
-                    $in: userId
-                }
-            })
-            if(isMember) throw new Error(`User: ${userId} was a member of server`)
-            // then, add it to server
-            const promise1 = ServerModel.updateOne({
-                id: serverId
-            }, {
-                $push: {
-                    memberIDs: userId
-                }
-            })
-            const promise2 = await UserModel.updateOne({
-                id: userId
-            }, {
-                $push: {
-                    serverIds: serverId
-                }
-            })
-            // console.log(promise2)
-            const promise3 = UserServerRoleModel.updateOne({
+            const server = await ServerModel.findById(serverId)
+            if(server.memberIDs.includes(userId)) throw new Error(`User: ${userId} was a member of server`)
+            server.memberIDs.push(userId)
+            // if request list contain userId, remove it
+            server.requestJoinUsers = server.requestJoinUsers.filter(item => item !== userId)
+            const addToRoleEveryonePromise = UserServerRoleModel.updateOne({
                 serverId: serverId,
                 name: `everyone`, 
             }, {
@@ -186,19 +183,19 @@ const ServerService = {
             })
             
             // add it to genaral channel && @everyone role group
-            // join channel
-            const promise4 = ChannelModel.updateOne({
-                serverId: serverId,
-                name: `general channel`
-            }, {
-                $push: {
-                    userIds: userId
-                }
-            })
-            const res = await Promise.all([promise1, promise3, promise4])
+            // join all channels public
+            // const promise4 = ChannelModel.updateOne({
+            //     serverId: serverId,
+            //     name: `general channel`
+            // }, {
+            //     $push: {
+            //         userIds: userId
+            //     }
+            // })
+            await Promise.all([addToRoleEveryonePromise, server.save()])
             return {
                 status: OK,
-                data: `UserId: ${userId} joined server: ${serverId}`
+                data: `UserId: ${userId} join server: ${serverId} success`
             }
 
         } catch (error) {
@@ -209,10 +206,42 @@ const ServerService = {
             
         }
     },
-    getRequestJoin: async (id) => {
-        // assurance request belong to server
-        
-    }
+    kickUser: async (userId, serverId) => {
+        try {
+            const server = await ServerModel.findById(serverId);
+            if(!server) throw new Error(`Server is not found by Id: ${serverId}`)
+            if(!server.memberIDs.includes(userId)) throw new Error(`User: ${userId} not be member of this server`)
+            server.memberIDs = server.memberIDs.filter(item => item !== userId)
+            const data = await server.save()
+            return {
+                status: OK,
+                data: data
+            }
+        } catch (error) {
+            return {
+                status: ERR,
+                data: error.message
+            }
+        }
+    },
+    denyUserRequestJoin: async (userIdRequest, serverId) => {
+        try {
+            const server = await ServerModel.findById(serverId)
+            if(!server) throw new Error(`Cant find server with id: ${serverId}`)
+            if(!server.requestJoinUsers.includes(userIdRequest)) throw new Error(`User: ${userIdRequest} is not request to join server: ${serverId}`)
+            server.requestJoinUsers = server.memberIDs.filter(item => item !== userIdRequest);
+            const data = await server.save();
+            return {
+                status: OK,
+                data: data
+            }
+        } catch (error) {
+            return {
+                status: ERR,
+                data: error.message
+            }
+        }
+    },
 }
 
 module.exports = ServerService
