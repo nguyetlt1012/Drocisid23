@@ -64,10 +64,8 @@ const AuthController = {
                     httpStatus.UNAUTHORIZED,
                     'Your account has been blocked for some reasons. Please contact us for supports or create a new account',
                 );
-            
-            createSendToken({
-                serverIds: data.serverIds,
-            }, res);
+            data.password = undefined
+            createSendToken(data, res);
 
         } catch (error) {
             if (error instanceof CusError) {

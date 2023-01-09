@@ -2,6 +2,7 @@ const { OK, apiStatus, httpStatus, ERR } = require('../constant/index');
 const CusError = require('../error/error');
 const _resp = require('../response/response');
 const { validate } = require('../utils/validator.util');
+const InviteService = require('../service/invite.service.js');
 const ServerService = require('../service/server.service');
 
 const ServerController = {
@@ -14,16 +15,9 @@ const ServerController = {
             if (checkParams.status === ERR) {
                 throw new CusError(apiStatus.INVALID_PARAM, httpStatus.BAD_REQUEST, checkParams.message);
             }
-            const dataReq = {
-                name: req.body.name,
-                description: req.body.description,
-                isPublic: req.body.isPublic,
-            };
-            dataReq.ownerId = req.userId;
-            const response = await ServerService.create(dataReq);
-            console.log(response);
+            const response = await ServerService.create(req.userId, req.body.name, req.body.description, req.body.isPublic);
             if (response.status !== OK) {
-                throw new CusError(apiStatus.OTHER_ERROR, httpStatus.INTERNAL_SERVER_ERROR, response.message);
+                throw new CusError(apiStatus.OTHER_ERROR, httpStatus.INTERNAL_SERVER_ERROR, response.data);
             }
             _resp(res, httpStatus.CREATED, apiStatus.SUCCESS, 'Server created!', response.data);
         } catch (error) {
@@ -39,12 +33,11 @@ const ServerController = {
             const response = await ServerService.getAllServerJoinedByUser(userId);
         } catch (error) {}
     },
-    modifyServer: async (req, res, next) => {
+    updateServer: async (req, res, next) => {
         try {
-            const { name, description, isPublic } = req.body;
-            const response = await ServerService.modify(req.params.id, { name, description, isPublic });
+            const response = await ServerService.update(req.params.id, req.body.description, req.body.isPublic);
             if (response.status !== OK) {
-                throw new CusError(apiStatus.DATABASE_ERROR, httpStatus.NOT_FOUND, response.message);
+                throw new CusError(apiStatus.DATABASE_ERROR, httpStatus.NOT_FOUND, response.data);
             }
             _resp(res, httpStatus.OK, apiStatus.SUCCESS, 'Server update!', response.data);
         } catch (error) {
@@ -64,6 +57,68 @@ const ServerController = {
             } else _resp(res, httpStatus.INTERNAL_SERVER_ERROR, apiStatus.OTHER_ERROR, error.message);
         }
     },
+    getServerById: async (req, res, next) => {
+        try {
+            const {status, data} = await ServerService.getByID(req.params.id)
+            if(status === ERR) throw new CusError(apiStatus.DATABASE_ERROR, httpStatus.NOT_FOUND, data)
+            _resp(res, httpStatus.OK, apiStatus.SUCCESS, `Success!`, data);
+        } catch (error) {
+            if (error instanceof CusError) {
+                _resp(res, error.httpStatus, error.apiStatus, error.message);
+            } else _resp(res, httpStatus.INTERNAL_SERVER_ERROR, apiStatus.OTHER_ERROR, error.message);
+        }
+    },
+    getServersPublic: async (req, res, next) => {
+        try {
+            // default = 20
+            const page = (req.query.page && req.query.page > 0) ? req.query.page : 1
+            const limit = (req.query.limit && req.query.limit > 0) ? req.query.limit : 10
+            const keyword = req.query.keyword ? req.query.keyword : ''
+            const {status, data} = await ServerService.getServersPulic(page, limit,keyword)
+            if(status === ERR) throw new CusError(apiStatus.DATABASE_ERROR, httpStatus.NOT_FOUND, data)
+            _resp(res, httpStatus.OK, apiStatus.SUCCESS, `Success!`, data);
+        } catch (error) {
+            if (error instanceof CusError) {
+                _resp(res, error.httpStatus, error.apiStatus, error.message);
+            } else _resp(res, httpStatus.INTERNAL_SERVER_ERROR, apiStatus.OTHER_ERROR, error.message);
+        }
+    },
+    // accept or deny a user request join
+    responseUserRequestJoin: async (req, res, next) => {
+        
+    },
+    getAllRequestsJoin: async (req, res, next) => {
+
+    },
+    getRequestJoin: async (req, res, next) => {
+
+    },
+    createInviteServer: async (req, res, next) => {
+        try {
+            const checkParams = await validate.checkParamRequest(req, ['expireTime']);
+
+            if(checkParams.status === ERR) {
+                throw new CusError(apiStatus.INVALID_PARAM, httpStatus.BAD_REQUEST, checkParams.message)
+            }
+            //call service
+            console.log(InviteService)
+
+            const {status, data} = await InviteService.createInvite(req.userId, req.body.expireTime, req.params.id, 0)
+            // inviteLink: /invite/code
+            if(status === ERR){
+                throw new CusError(apiStatus.DATABASE_ERROR, httpStatus.INTERNAL_SERVER_ERROR, data);
+            }
+            _resp(res, httpStatus.CREATED, apiStatus.SUCCESS, "SUCCESS", data)
+
+        } catch (error) {
+            if(error instanceof CusError) {
+                _resp(res, error.httpStatus, error.apiStatus, error.message)
+            }
+            else {
+                _resp(res, httpStatus.INTERNAL_SERVER_ERROR, apiStatus.OTHER_ERROR, error.message)
+            }
+        }
+    }
 };
 
 module.exports = ServerController;

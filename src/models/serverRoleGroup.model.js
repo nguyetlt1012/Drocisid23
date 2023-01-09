@@ -8,7 +8,7 @@ const ServerRoleGroupSchema = new Schema(
       type: Array,
     },
     serverId: {
-      type: [Schema.Types.ObjectId],
+      type: Schema.Types.ObjectId,
       ref: 'Server',
     },
   },
