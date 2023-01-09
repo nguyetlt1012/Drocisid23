@@ -1,3 +1,8 @@
+NodeJs: 16.15.1
+NPM: 8.11.0
+MongoDB: 6.0.1
+Docker: 20.10.11
+
 1. Convention Code
 - tên file, tên hàm, tên biến: Camel case vd: serverRouter, getAllUser, newServer
 - tên model: Pascal case vd: UserChannelRole

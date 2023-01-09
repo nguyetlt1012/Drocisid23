@@ -6,7 +6,7 @@ COPY package*.json .
 
 RUN npm install
 
-COPY .  /app/
+COPY .  /app
 
 EXPOSE 80
 
