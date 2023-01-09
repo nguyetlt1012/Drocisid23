@@ -1,5 +1,5 @@
 require('dotenv').config({ path: './.env' });
-const { ServerRouter, UserRouter, ChannelRouter } = require('./routes/index.router');
+const { ServerRouter, UserRouter, ChannelRouter, InviteRouter } = require('./routes/index.router');
 const express = require('express');
 const mongoose = require('mongoose');
 
@@ -18,6 +18,7 @@ app.use(express.json());
 // Routers
 app.use('/api/v1/servers', ServerRouter);
 app.use('/api/v1/users', UserRouter);
+// app.use('/api/v1/invites', InviteRouter);
 app.use('/api/v1/channels', ChannelRouter);
 
 //start server

@@ -4,18 +4,22 @@ const InviteSchema = new Schema(
   {
     inviteCode: {
       type: String,
+      unique: true,
     },
     createBy: {
       type: Schema.Types.ObjectId,
       require: true,
     },
-
+    expireAt: {
+      type: Schema.Types.Date
+    },
     //unit: minute
     // if expireTime == 0 is never expire
     expireTime: {
       type: Date,
       require: true,
-      default: 7*24*60,
+      // default 7 days, unit = milisecond
+      default: 7*24*60*60*1000,
     },
     source: {
       type: Schema.Types.ObjectId,

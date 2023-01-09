@@ -2,33 +2,36 @@ const { OK, ERR } = require('../constant/index');
 const ChannelModel = require('../models/channel.model');
 const ServerModel = require('../models/server.model');
 const UserModel = require('../models/user.model');
+const UserChannelRoleModel = require('../models/userChanelRole.model');
+const UserServerRoleModel = require('../models/userServerRole.model');
 
 const ServerService = {
     create: async (ownerId, name, description, isPublic) => {
         try {
             // create newServer on db
-            console.log(ownerId);
+            // make transaction
             const newServer = await ServerModel.create({
                 ownerId,
                 name,
                 description,
-                isPublic
+                isPublic,
+                memberIDs: [ownerId]
             });
             if(!newServer) throw new Error(`Cant create Server`)
             // update field serverIds in user
-            const user = await UserModel.findByIdAndUpdate(ownerId, {
+            const user =  UserModel.findByIdAndUpdate(ownerId, {
                 $push: {
                     serverIds: newServer.id
                 }
             })
-            if(!user) throw new Error(`Cant update field serverIds`)
             // create general Channal
-            const generalChannel = new ChannelModel.create({
+            const generalChannel =  ChannelModel.create({
                 serverId: newServer.id,
+                name: `General`,
                 description: `General channel`,
                 userIds: [ownerId]
             })
-            if(!generalChannel) throw new Error(`Cant create genaral Server`)
+            await Promise.all([user, generalChannel])
             return {
                 status: OK,
                 data: newServer
@@ -36,7 +39,7 @@ const ServerService = {
         } catch (error) {
             return {
                 status: ERR,
-                message: error.message
+                data: error.message
             }
         }
     },
@@ -58,12 +61,11 @@ const ServerService = {
             }
         }
     },
-    modify: async(serverId, dataReq) => {
+    update: async(serverId, description, isPublic) => {
         try {
             const server =  await ServerModel.updateOne({id: serverId}, {
-                name: dataReq.name,
-                description: dataReq.description,
-                isPublic: dataReq.isPublic
+                description,
+                isPublic,
             })
             if(!server) throw new Error(`Cant found server with Id: ${serverId}`)
             return {
@@ -73,7 +75,7 @@ const ServerService = {
         } catch (error) {
             return {
                 status: ERR,
-                message: error.message
+                data: error.message
             }
         }
     },
@@ -88,7 +90,7 @@ const ServerService = {
         } catch (error) {
             return {
                 status: ERR,
-                message: error.message
+                data: error.message
             }
             
         }
@@ -103,13 +105,25 @@ const ServerService = {
         } catch (error) {
             return {
                 status: ERR,
-                message: error.message
+                data: error.message
             }
         }
     },
-    getAll: async(dataReq) => {
+    getServersPulic: async(page, limit, keyword) => {
         try {
-            const servers = await ServerModel.findAll(dataReq);
+            const servers = await ServerModel.find({
+                isPublic: true,
+                name: {
+                    $regex: keyword
+                }
+            }, {
+                name: 1,
+                description: 1,
+                ownerId: 1,
+            }, {
+                skip: (page - 1)*limit,
+                limit: limit
+            })
             return {
                 status: OK,
                 data: servers,
@@ -118,7 +132,7 @@ const ServerService = {
         } catch (error) {
             return {
                 status: ERR,
-                message: error.message
+                data: error.message
             }
         }
     },
@@ -135,6 +149,69 @@ const ServerService = {
         } catch (error) {
             
         }
+    },
+    joinServer: async (userId, serverId) => {
+        try {
+            // before join, check if they was member of server
+            const isMember = await ServerModel.findOne({
+                id: serverId,
+                memberIDs: {
+                    $in: userId
+                }
+            })
+            if(isMember) throw new Error(`User: ${userId} was a member of server`)
+            // then, add it to server
+            const promise1 = ServerModel.updateOne({
+                id: serverId
+            }, {
+                $push: {
+                    memberIDs: userId
+                }
+            })
+            const promise2 = await UserModel.updateOne({
+                id: userId
+            }, {
+                $push: {
+                    serverIds: serverId
+                }
+            })
+            // console.log(promise2)
+            const promise3 = UserServerRoleModel.updateOne({
+                serverId: serverId,
+                name: `everyone`, 
+            }, {
+                $push: {
+                    userId: userId,
+                }
+            })
+            
+            // add it to genaral channel && @everyone role group
+            // join channel
+            const promise4 = ChannelModel.updateOne({
+                serverId: serverId,
+                name: `general channel`
+            }, {
+                $push: {
+                    userIds: userId
+                }
+            })
+            const res = await Promise.all([promise1, promise3, promise4])
+            return {
+                status: OK,
+                data: `UserId: ${userId} joined server: ${serverId}`
+            }
+
+        } catch (error) {
+            return {
+                status: ERR,
+                data: error.message
+            }
+            
+        }
+    },
+    getRequestJoin: async (id) => {
+        // assurance request belong to server
+        
     }
 }
 

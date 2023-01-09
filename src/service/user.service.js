@@ -1,6 +1,7 @@
 const User = require('../models/user.model');
 const bcrypt = require('bcryptjs');
 const { ERR, OK } = require('../constant');
+const InviteModel = require('../models/invite.model');
 
 const UserService = {
     create: async (user) => {
@@ -43,6 +44,15 @@ const UserService = {
                 status: ERR,
                 message: error.message,
             };
+        }
+    },
+    joinWithLink: async (inviteCode) => {
+        try {
+            const invite = await InviteModel.findOne({inviteCode: inviteCode})
+            if(!invite) throw new Error(`Invite: ${inviteCode} code/link is not correct`)
+            // add to member of servers
+        } catch (error) {
+            
         }
     }
 };
