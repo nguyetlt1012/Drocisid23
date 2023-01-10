@@ -12,7 +12,7 @@ const ChannelRoleGroupSchema = new Schema(
       type: Schema.Types.ObjectId,
       ref: 'Channel',
       require: true
-    },
+    }, 
     memberIds: {
       type: [Schema.Types.ObjectId],
       ref: 'User'
