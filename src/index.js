@@ -2,10 +2,12 @@ require('dotenv').config({ path: './.env' });
 const { ServerRouter, UserRouter, ChannelRouter, InviteRouter } = require('./routes/index.router');
 const express = require('express');
 const mongoose = require('mongoose');
+const cors = require('cors')
 
 const app = express();
+app.use(cors())
 
-const PORT = process.env.SERVER_PORT || 8080;
+const PORT = process.env.SERVER_PORT || 3000;
 
 //connect to db
 mongoose
