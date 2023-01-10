@@ -9,5 +9,5 @@ router.post('/forgot-password', authController.forgotPassword);
 router.post('/reset-password', authController.resetPassword);
 router.get('/invite/:code', Authen.verifyToken, userController.joinWithLink)
 router.post('/request-join-server/:serverId', Authen.verifyToken, userController.requestJoinServer)
-
+router.get('/:userId', Authen.verifyToken, userController.getMe);
 module.exports = router;

@@ -38,6 +38,20 @@ const UserController = {
                 _resp(res, error.httpStatus, error.apiStatus, error.message);
             } else _resp(res, httpStatus.INTERNAL_SERVER_ERROR, apiStatus.OTHER_ERROR, error.message);
         }
+    },
+    getMe: async(req, res, next) =>{
+        try {
+            const id = req.params.userId;
+            if (!id) throw new CusError(apiStatus.AUTH_ERROR, httpStatus.BAD_REQUEST, 'Invalid id');
+            const user = await UserService.getById(id);
+            if (user.status == ERR) throw new CusError(apiStatus.DATABASE_ERROR, httpStatus.BAD_REQUEST, user.message);
+            _resp(res, httpStatus.CREATED, apiStatus.SUCCESS, 'success', user);
+
+        } catch (error) {
+            if (error instanceof CusError) {
+                _resp(res, error.httpStatus, error.apiStatus, error.message);
+            } else _resp(res, httpStatus.INTERNAL_SERVER_ERROR, apiStatus.OTHER_ERROR, error.message);
+        }
     }
 }
 

@@ -40,6 +40,17 @@ const UserService = {
             };
         }
     },
+    getById: async (id) =>{
+        try {
+            const user = await User.findById(id);
+            return user;
+        } catch (error) {
+            return {
+                status: ERR,
+                message: error.message,
+            };
+        }
+    },
     resetPassword: async (email, password, userId) => {
         try{
            const user = await User.findOne({_id: userId, email: email});
