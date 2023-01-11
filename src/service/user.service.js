@@ -43,7 +43,11 @@ const UserService = {
     getById: async (id) =>{
         try {
             const user = await User.findById(id);
-            return user;
+            user.password = undefined
+            return {
+                status: OK,
+                data: user
+            };
         } catch (error) {
             return {
                 status: ERR,
