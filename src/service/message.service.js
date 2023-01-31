@@ -28,8 +28,7 @@ const MessageService = {
                 channelId: channelId
             }).sort({
                 $natural: 1
-            }).limit(20)
-            messages.map(item => item.populate('User', '_id fullname avatarUrl'))
+            }).limit(20).populate('author_id', 'fullname avatarUrl')
             return {
                 status: OK,
                 data: messages

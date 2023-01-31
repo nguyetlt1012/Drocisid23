@@ -22,7 +22,7 @@ const MessageController = {
     sendMessage: async(req, res, next) => {
         try {
             
-            const {status, data} = await MessageService.sendMessage(req.body.content, req.params.channelId)
+            const {status, data} = await MessageService.sendMessage(req.body.content, req.params.channelId, req.userId)
             if(status === ERR) throw new CusError(apiStatus.DATABASE_ERROR, httpStatus.NOT_FOUND, data)
             _resp(res, httpStatus.OK, apiStatus.SUCCESS, `Success!`, data);
         } catch (error) {
