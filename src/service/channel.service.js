@@ -5,7 +5,7 @@ const ServerRoleGroup = require('../models/serverRoleGroup.model');
 const { serverPolicy, ERR, OK, channelPolicy } = require('../constant/index');
 const ChannelRoleGroup = require('../models/channelRoleGroup.model');
 const MessageModel = require('../models/message.model');
-
+const ChannelRoleGroupService = require('../service/channelRole.service')
 const ChannelService = {
     create: async (channel) => {
         try {
@@ -32,7 +32,7 @@ const ChannelService = {
             // const roleEveryone = await ServerRoleGroup.findOne({serverId: channel.serverId, name: "@everyone"});
             // if (!roleEveryone) throw new Error("Can't find role everyone");
 
-            const channelRole = await ChannelRoleGroup.create({name: "@everyone", rolePolicies: [channelPolicy.MANAGE_MESSAGE, channelPolicy.VIEW_CHANNEL], channelId: newChannel._id});
+            const channelRole = await ChannelRoleGroup.create({name: "everyone", rolePolicies: [channelPolicy.MANAGE_MESSAGE, channelPolicy.VIEW_CHANNEL], channelId: newChannel._id});
             if (!channelRole) throw new Error("Can't create role channel");
 
             return {
@@ -98,7 +98,7 @@ const ChannelService = {
             return {
                 status: OK,
                 data: {
-                    ...channel._doc,
+                    channel,
                     messages,
                     roles
                 }
