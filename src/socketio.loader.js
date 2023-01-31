@@ -37,10 +37,7 @@ function socketioLoader(server) {
 
             socket.join(channelId);
             socket.channelId = channelId;
-
-            // curChannel.listActiveUser.push(curUser);
-            // await curChannel.save();
-
+        
             const cacheChannel = await redisClient.get(`channels/${channelId}`);
             if (!cacheChannel) {
                 await redisClient.set(`channels/${channelId}`, JSON.stringify({ listActiveUserId: [userId] }));
