@@ -24,19 +24,23 @@ const ChannelService = {
             // if (!policy.rolePolicies.includes(serverPolicy.MANAGE_CHANNEL)) {
             //     throw new Error('you can not permission for this action');
             // }
-            
+
             const newChannel = await Channel.create(channel);
             if (!newChannel) throw new Error("Can't create channel");
 
             // const roleEveryone = await ServerRoleGroup.findOne({serverId: channel.serverId, name: "@everyone"});
             // if (!roleEveryone) throw new Error("Can't find role everyone");
 
-            const channelRole = await ChannelRoleGroup.create({name: "@everyone", rolePolicies: [channelPolicy.MANAGE_MESSAGE, channelPolicy.VIEW_CHANNEL], channelId: newChannel._id});
+            const channelRole = await ChannelRoleGroup.create({
+                name: '@everyone',
+                rolePolicies: [channelPolicy.MANAGE_MESSAGE, channelPolicy.VIEW_CHANNEL],
+                channelId: newChannel._id,
+            });
             if (!channelRole) throw new Error("Can't create role channel");
 
             return {
                 status: OK,
-                data: newChannel
+                data: newChannel,
             };
         } catch (error) {
             return {
@@ -47,7 +51,7 @@ const ChannelService = {
     },
     getAllByServer: async (id) => {
         try {
-            return await Channel.find({ serverId: id});
+            return await Channel.find({ serverId: id });
         } catch (error) {
             return {
                 status: ERR,
@@ -55,14 +59,14 @@ const ChannelService = {
             };
         }
     },
-    update: async (id, data) =>{
+    update: async (id, data) => {
         try {
             const channel = await Channel.findByIdAndUpdate(id, data, {
-                new: true
+                new: true,
             });
             return {
                 status: OK,
-                data: channel
+                data: channel,
             };
         } catch (error) {
             return {
@@ -71,13 +75,13 @@ const ChannelService = {
             };
         }
     },
-    delete: async (id)=>{
+    delete: async (id) => {
         try {
             await Channel.findByIdAndRemove(id);
             return {
                 status: OK,
-                data: {}
-            }
+                data: {},
+            };
         } catch (error) {
             return {
                 status: ERR,
@@ -85,21 +89,30 @@ const ChannelService = {
             };
         }
     },
-    getById: async(id) =>{
+    getById: async (id) => {
         try {
             const channel = await Channel.findById(id);
-            if (!channel) throw new Error("invalid channel");
+            if (!channel) throw new Error('invalid channel');
             return {
                 status: OK,
-                data: channel
-            }
+                data: channel,
+            };
         } catch (error) {
             return {
                 status: ERR,
                 message: error.message,
             };
         }
-    }
+    },
+    getChannelDetail: async (channelId) => {
+        try {
+            const channel = await Channel.findById(channelId).populate('userIds');
+
+            return channel;
+        } catch (error) {
+            return null;
+        }
+    },
 };
 
 module.exports = ChannelService;
