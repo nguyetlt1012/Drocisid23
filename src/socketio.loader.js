@@ -2,16 +2,19 @@ const jwt = require('jsonwebtoken');
 const ChannelService = require('./service/channel.service');
 const { Server } = require('socket.io');
 const { redisClient } = require('./redis.loader');
+const MessageService = require('./service/message.service');
 
 function socketioLoader(server) {
     const io = new Server(server, {
         cors: {
             origin: '*',
+            methods: ['GET', 'POST'],
         },
     });
 
     // Middleware
     io.use(async (socket, next) => {
+        console.log(socket.handshake.query);
         const { accessToken } = socket.handshake.query;
 
         jwt.verify(accessToken, process.env.JWT_SECRET, (err, decoded) => {
@@ -37,7 +40,7 @@ function socketioLoader(server) {
 
             socket.join(channelId);
             socket.channelId = channelId;
-        
+
             const cacheChannel = await redisClient.get(`channels/${channelId}`);
             if (!cacheChannel) {
                 await redisClient.set(`channels/${channelId}`, JSON.stringify({ listActiveUserId: [userId] }));
@@ -75,12 +78,27 @@ function socketioLoader(server) {
                 const cacheChannel = await redisClient.get(`channels/${curChannel._id}`);
                 if (cacheChannel) {
                     const curCacheChannel = JSON.parse(cacheChannel);
-                    curCacheChannel.listActiveUserId = curCacheChannel.listActiveUserId.filter((x) => x !== socket.userId);
+                    curCacheChannel.listActiveUserId = curCacheChannel.listActiveUserId.filter(
+                        (x) => x !== socket.userId,
+                    );
                     await redisClient.set(`channels/${curChannel._id}`, JSON.stringify(curCacheChannel));
                 } else {
                     console.log('Cache channel not found');
                 }
             }
+        });
+
+        socket.on('sendMessage', async (content, channelId) => {
+            const curChannel = await ChannelService.getChannelDetail(channelId);
+
+            if (!channelId || !curChannel || !curChannel.userIds?.find((x) => x._id.toString() === userId)) {
+                socket.emit('rejectToChannel');
+                return;
+            }
+
+            const newMessage = await MessageService.sendMessage(content, channelId, userId);
+
+            io.to(channelId).emit('new  Message', newMessage);
         });
 
         socket.on('disconnect', async () => {
@@ -95,7 +113,9 @@ function socketioLoader(server) {
                 const cacheChannel = await redisClient.get(`channels/${curChannel._id}`);
                 if (cacheChannel) {
                     const curCacheChannel = JSON.parse(cacheChannel);
-                    curCacheChannel.listActiveUserId = curCacheChannel.listActiveUserId.filter((x) => x !== socket.userId);
+                    curCacheChannel.listActiveUserId = curCacheChannel.listActiveUserId.filter(
+                        (x) => x !== socket.userId,
+                    );
                     await redisClient.set(`channels/${curChannel._id}`, JSON.stringify(curCacheChannel));
                 } else {
                     console.log('Cache channel not found');
