@@ -11,10 +11,6 @@ const ServerRoleGroupSchema = new Schema(
       type: Schema.Types.ObjectId,
       ref: 'Server',
     },
-    memberIds: {
-      type: [ Schema.Types.ObjectId],
-      ref: 'User'
-    }
   },
   {
     timestamps: true,
