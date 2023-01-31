@@ -79,9 +79,9 @@ const ChannelRoleGroupService = {
     },
     getAll: async(channelId, userId) =>{
         try {
-            const roleEveryOne = await ChannelRoleGroupModel.findOne({channelId: channelId, name: '@everyone'});
-            const userRoles = await UserChannelRoleModel.find({channelId: channelId, userId: userId}).populate('channelId');
-            console.log(channelId, userId)
+            const roleEveryOne = await ChannelRoleGroupModel.findOne({channelId: channelId, name: 'everyone'});
+            const userRoles = await UserChannelRoleModel.find({channelId: channelId, userId: userId}).populate('channelRoleGroupId');
+            // console.log(channelId, userId)
             if (!userRoles.length) return {
                 status: OK,
                 data: roleEveryOne
