@@ -79,6 +79,25 @@ const ChannelRoleController = {
                 _resp(res, httpStatus.INTERNAL_SERVER_ERROR, apiStatus.OTHER_ERROR, error.message, {});
             } 
         }
+    },
+    getAll: async(req, res, next) =>{
+        try {
+            const channelId = req.params.channelId;
+            if (!channelId) throw new CusError(apiStatus.INVALID_PARAM, httpStatus.BAD_REQUEST, "invalid channel id");
+
+            const response = await ChannelRoleGroupService.getAll(channelId, req.userId);
+
+            if (response.status == ERR) throw new CusError(apiStatus.DATABASE_ERROR, httpStatus.BAD_REQUEST, role.message);
+            
+            _resp(res, httpStatus.OK, apiStatus.SUCCESS, "get success", response.data);
+
+        } catch (error) {
+            if (error instanceof CusError) {
+                _resp(res, error.httpStatus, error.apiStatus, error.message, {});
+            } else {
+                _resp(res, httpStatus.INTERNAL_SERVER_ERROR, apiStatus.OTHER_ERROR, error.message, {});
+            } 
+        }
     }
 };
 module.exports = ChannelRoleController;

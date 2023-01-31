@@ -2,6 +2,7 @@ const { ERR, OK } = require("../constant");
 const ChannelModel = require("../models/channel.model");
 const ChannelRoleGroupModel = require("../models/channelRoleGroup.model");
 const ServerRoleGroupModel = require("../models/serverRoleGroup.model");
+const UserChannelRoleModel = require("../models/userChanelRole.model");
 
 const ChannelRoleGroupService = {
     create: async(data) =>{
@@ -69,6 +70,27 @@ const ChannelRoleGroupService = {
                 status: OK,
                 data: {}
             }
+        } catch (error) {
+            return {
+                status: ERR,
+                message: error.message,
+            };
+        }
+    },
+    getAll: async(channelId, userId) =>{
+        try {
+            const roleEveryOne = await ChannelRoleGroupModel.findOne({channelId: channelId, name: '@everyone'});
+            const userRoles = await UserChannelRoleModel.find({channelId: channelId, userId: userId}).populate('channelId');
+            console.log(channelId, userId)
+            if (!userRoles.length) return {
+                status: OK,
+                data: roleEveryOne
+            }
+            return {
+                status: OK,
+                data: [roleEveryOne, userRoles]
+            }
+            
         } catch (error) {
             return {
                 status: ERR,
