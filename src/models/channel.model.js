@@ -29,6 +29,7 @@ const ChannelSchema = new Schema(
       validate(value) {
         if (!TYPES.includes(value)) throw new Error('Invalid type channel');
       },
+      default: 'text'
     },
     //user cant join channel from invite link unless they belong to this server
     inviteLinkIds: {
