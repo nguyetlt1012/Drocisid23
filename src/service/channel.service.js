@@ -4,6 +4,7 @@ const UserServerRole = require('../models/userServerRole.model');
 const ServerRoleGroup = require('../models/serverRoleGroup.model');
 const { serverPolicy, ERR, OK, channelPolicy } = require('../constant/index');
 const ChannelRoleGroup = require('../models/channelRoleGroup.model');
+const MessageModel = require('../models/message.model');
 
 const ChannelService = {
     create: async (channel) => {
@@ -89,9 +90,15 @@ const ChannelService = {
         try {
             const channel = await Channel.findById(id);
             if (!channel) throw new Error("invalid channel");
+            const messages = await MessageModel.find({
+                channelId: channel.id
+            }).populate('User', 'fullname avatarUrl')
             return {
                 status: OK,
-                data: channel
+                data: {
+                    ...channel._doc,
+                    messages
+                }
             }
         } catch (error) {
             return {

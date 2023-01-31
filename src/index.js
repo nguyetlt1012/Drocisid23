@@ -1,9 +1,9 @@
 require('dotenv').config({ path: './.env' });
-const { ServerRouter, UserRouter, ChannelRouter, InviteRouter } = require('./routes/index.router');
+const { ServerRouter, UserRouter, ChannelRouter, InviteRouter, MessageRouter } = require('./routes/index.router');
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors')
-
+const {Server} = require('socket.io')
 const app = express();
 app.use(cors())
 
@@ -22,8 +22,19 @@ app.use('/api/v1/servers', ServerRouter);
 app.use('/api/v1/users', UserRouter);
 // app.use('/api/v1/invites', InviteRouter);
 app.use('/api/v1/channels', ChannelRouter);
-
+app.use('/api/v1/messages', MessageRouter)
 //start server
-app.listen(PORT, async () => {
+const server = app.listen(PORT, async () => {
   console.log(`Server is running at http://localhost:${PORT}`);
 });
+
+const io = new Server(server)
+io.on('connection', (socket) => {
+  console.log(socket)
+  console.log('a user connected')
+  socket.off('setup', () => {
+    console.log("User Disconnected");
+    socket.leave(userData._id);
+  })
+})
+
