@@ -1,7 +1,8 @@
-const { default: mongoose } = require('mongoose');
+const { default: mongoose, SchemaType } = require('mongoose');
 const { OK, ERR } = require('../constant/index');
 const ChannelModel = require('../models/channel.model');
 const ServerModel = require('../models/server.model');
+const ServerRoleGroupModel = require('../models/serverRoleGroup.model');
 const UserModel = require('../models/user.model');
 const UserChannelRoleModel = require('../models/userChanelRole.model');
 const UserServerRoleModel = require('../models/userServerRole.model');
@@ -31,6 +32,19 @@ const ServerService = {
                 name: `General`,
                 description: `General channel`,
                 userIds: [ownerId]
+            })
+            // create role @everyone default
+            const everyone = await ServerRoleGroupModel.create({
+                serverId: newServer.id,
+                name: 'everyone',
+                rolePolicies: [3, 5]
+            })
+            if(!everyone) throw new Error(`Cant not create everyone role`)
+            // create user_role_server
+            const userRoleServer = await UserServerRoleModel.create({
+                userId: ownerId,
+                serverId:newServer.id,
+                serverRoleGroupId: [everyone.id]
             })
             // await Promise.all([user, generalChannel])
             return {
@@ -98,10 +112,18 @@ const ServerService = {
     },
     getByID: async (id) => {
         try {
-            const server =  await ServerModel.findById(id);
+            const server =  await ServerModel.findById(id)
+            const channels = await ChannelModel.find({
+                serverId: id
+            }, {
+                _id: 1
+            })
             return {
                 status: OK,
-                data: server
+                data: {
+                    ...server._doc,
+                    channels
+                }
             }
         } catch (error) {
             return {
@@ -173,14 +195,24 @@ const ServerService = {
             server.memberIDs.push(userId)
             // if request list contain userId, remove it
             server.requestJoinUsers = server.requestJoinUsers.filter(item => item !== userId)
-            const addToRoleEveryonePromise = UserServerRoleModel.updateOne({
+            // find the everyone role server
+            const everyoneRoleServer = await ServerRoleGroupModel.findOne({
                 serverId: serverId,
-                name: `everyone`, 
-            }, {
-                $push: {
-                    userId: userId,
-                }
+                name: `everyone`,
             })
+            const addToRoleEveryonePromise = await UserServerRoleModel.create({
+                serverId: serverId,
+                userId: userId,
+                serverRoleGroupId: [everyoneRoleServer.id]
+            })
+            //  = UserServerRoleModel.updateOne({
+            //     serverId: serverId,
+            //     name: `everyone`, 
+            // }, {
+            //     $push: {
+            //         userId: userId,
+            //     }
+            // })
             
             // add it to genaral channel && @everyone role group
             // join all channels public
@@ -192,7 +224,8 @@ const ServerService = {
             //         userIds: userId
             //     }
             // })
-            await Promise.all([addToRoleEveryonePromise, server.save()])
+            // await Promise.all([addToRoleEveryonePromise, server.save()])
+            await server.save();
             return {
                 status: OK,
                 data: `UserId: ${userId} join server: ${serverId} success`
@@ -213,6 +246,12 @@ const ServerService = {
             if(!server.memberIDs.includes(userId)) throw new Error(`User: ${userId} not be member of this server`)
             server.memberIDs = server.memberIDs.filter(item => item !== userId)
             const data = await server.save()
+            // erase all role that user were
+            const userRole = await UserServerRoleModel.deleteOne({
+                userId: userId,
+                serverId: serverId
+            })
+            if(!userRole) throw new Error(`User Role is not found`)
             return {
                 status: OK,
                 data: data
