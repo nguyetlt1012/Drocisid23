@@ -11,12 +11,12 @@ const MessageSchema = new Schema(
       ref: 'User',
       require: true,
     },
-    //chanelId or personalId
-    destination: {
-      type: Schema.Types.ObjectId,
-      require: true,
-    },
-    chanelId: {
+    // //chanelId or personalId
+    // destination: {
+    //   type: Schema.Types.ObjectId,
+    //   require: true,
+    // },
+    channelId: {
       type: Schema.Types.ObjectId,
       ref: 'Channel',
       require: true,

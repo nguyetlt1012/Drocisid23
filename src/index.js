@@ -1,5 +1,5 @@
 require('dotenv').config({ path: './.env' });
-const { ServerRouter, UserRouter, ChannelRouter, InviteRouter } = require('./routes/index.router');
+const { ServerRouter, UserRouter, ChannelRouter, MessageRouter } = require('./routes/index.router');
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
@@ -32,6 +32,7 @@ app.use('/api/v1/servers', ServerRouter);
 app.use('/api/v1/users', UserRouter);
 // app.use('/api/v1/invites', InviteRouter);
 app.use('/api/v1/channels', ChannelRouter);
+app.use('/api/v1/messages', MessageRouter);
 
 //start server
 app.listen(PORT, async () => {

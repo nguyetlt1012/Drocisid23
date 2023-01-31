@@ -6,6 +6,7 @@ const ServerRoleGroupModel = require('../models/serverRoleGroup.model');
 const UserModel = require('../models/user.model');
 const UserChannelRoleModel = require('../models/userChanelRole.model');
 const UserServerRoleModel = require('../models/userServerRole.model');
+const ChannelService = require('./channel.service');
 
 const ServerService = {
     create: async (ownerId, name, description, isPublic) => {
@@ -27,12 +28,14 @@ const ServerService = {
             //     }
             // })
             // create general Channal
-            const generalChannel = await ChannelModel.create({
+            const generalChannel = ChannelService.create({
                 serverId: newServer.id,
                 name: `General`,
                 description: `General channel`,
-                userIds: [ownerId]
+                userIds: [ownerId],
+                type: 'text'
             })
+
             // create role @everyone default
             const everyone = await ServerRoleGroupModel.create({
                 serverId: newServer.id,
