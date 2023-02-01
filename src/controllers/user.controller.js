@@ -16,6 +16,7 @@ const UserController = {
             let response;
             if(invite.data && invite.data.inviteType === 0) {
                 response = await ServerService.joinServer(req.userId, invite.data.source);
+                if(response.status == ERR) throw new CusError(apiStatus.OTHER_ERROR, httpStatus.BAD_REQUEST, response.data)
             }
             else {
                 // response = await ChannelService.joinChannel

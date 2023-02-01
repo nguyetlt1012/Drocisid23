@@ -1,5 +1,6 @@
 const { ERR } = require("../constant");
 const { OK } = require("../constant/HttpStatus");
+const { deleteMessage } = require("../controllers/message.controller");
 const MessageModel = require("../models/message.model");
 
 
@@ -28,11 +29,26 @@ const MessageService = {
                 channelId: channelId
             }).sort({
                 $natural: 1
-            }).limit(20)
-            messages.map(item => item.populate('User', '_id fullname avatarUrl'))
+            }).limit(20).populate('author_id', 'fullname avatarUrl')
             return {
                 status: OK,
                 data: messages
+            }
+        } catch (error) {
+            return {
+                status: ERR,
+                data: error.message
+            }
+        }
+    },
+    deleteMessage: async (messageId) => {
+        try {
+            await MessageModel.deleteOne({
+                id: messageId
+            })
+            return {
+                status: OK,
+                data: "message is deleted"
             }
         } catch (error) {
             return {

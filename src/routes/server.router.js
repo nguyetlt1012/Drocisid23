@@ -18,26 +18,26 @@ router.post('/response-user-request/:serverId', Authen.verifyToken, serverContro
 router.get('/get-servers-public', serverController.getServersPublic)
 
 // get-member
-router.get('/:id', Authen.verifyToken, serverController.getServerById);
+router.get('/:serverId', Authen.verifyToken, serverController.getServerById);
 
 // router.get('/', serverController.getAllServer);
-router.delete('/:id', Authen.verifyToken, Authen.verifyPermission(OWNER), serverController.deleteServer)
+router.delete('/:serverId', Authen.verifyToken, serverController.deleteServer)
 
 // create
 router.post('/', Authen.verifyToken,  serverController.createServer);
 
 // update
-router.put('/:id', Authen.verifyToken, serverController.updateServer);
+router.put('/:serverId', Authen.verifyToken, serverController.updateServer);
 
 
 // kick user to server
-router.put('/:id/kick-user', Authen.verifyToken, serverController.kickUser)
+router.put('/:serverId/kick-user', Authen.verifyToken, serverController.kickUser)
 // create invite link
-router.post('/create-invite/:id', Authen.verifyToken, Authen.verifyPermission(MANAGE_INVITE), serverController.createInviteServer)
+router.post('/create-invite/:serverId', Authen.verifyToken, Authen.verifyPermission(serverPolicy.MANAGE_INVITE), serverController.createInviteServer)
 
 
 // response request join
-router.post('/response-requests/:id', Authen.verifyToken, Authen.verifyPermission(MANAGE_SERVER), serverController.responseUserRequestJoin)
+router.post('/response-requests/:serverId', Authen.verifyToken, Authen.verifyPermission(MANAGE_SERVER), serverController.responseUserRequestJoin)
 
 
 // Role on server

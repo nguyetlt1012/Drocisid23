@@ -39,7 +39,7 @@ const ServerController = {
     },
     updateServer: async (req, res, next) => {
         try {
-            const response = await ServerService.update(req.params.id, req.body.description, req.body.isPublic);
+            const response = await ServerService.update(req.params.serverId, req.body.description, req.body.isPublic);
             if (response.status !== OK) {
                 throw new CusError(apiStatus.DATABASE_ERROR, httpStatus.NOT_FOUND, response.data);
             }
@@ -52,7 +52,7 @@ const ServerController = {
     },
     deleteServer: async (req, res, next) => {
         try {
-            const { status, data } = await ServerService.delete(req.params.id, req.userId);
+            const { status, data } = await ServerService.delete(req.params.serverId, req.userId);
             if (status !== OK) throw new CusError(apiStatus.DATABASE_ERROR, httpStatus.FORBIDDEN, data);
             _resp(res, httpStatus.OK, apiStatus.SUCCESS, `Delete success!`, data);
         } catch (error) {
@@ -63,7 +63,7 @@ const ServerController = {
     },
     getServerById: async (req, res, next) => {
         try {
-            const {status, data} = await ServerService.getByID(req.params.id)
+            const {status, data} = await ServerService.getByID(req.params.serverId, req.userId)
             if(status === ERR) throw new CusError(apiStatus.DATABASE_ERROR, httpStatus.NOT_FOUND, data)
             _resp(res, httpStatus.OK, apiStatus.SUCCESS, `Success!`, data);
         } catch (error) {
@@ -111,7 +111,7 @@ const ServerController = {
             if(checkParams.status === ERR) {
                 throw new CusError(apiStatus.INVALID_PARAM, httpStatus.BAD_REQUEST, checkParams.message)
             }
-            const {status, data} = await InviteService.createInvite(req.userId, req.body.expireTime, req.params.id, 0)
+            const {status, data} = await InviteService.createInvite(req.userId, req.body.expireTime, req.params.serverId, 0)
             // inviteLink: /invite/code
             if(status === ERR){
                 throw new CusError(apiStatus.DATABASE_ERROR, httpStatus.INTERNAL_SERVER_ERROR, data);
@@ -130,7 +130,7 @@ const ServerController = {
     kickUser: async (req, res, next) => {
         try {
             const userIdKick = req.body.userIdKick
-            const {status, data} = await ServerService.kickUser(userIdKick, req.params.id)
+            const {status, data} = await ServerService.kickUser(userIdKick, req.params.serverId)
             if(status === ERR){
                 throw new CusError(apiStatus.DATABASE_ERROR, httpStatus.INTERNAL_SERVER_ERROR, data);
             }
