@@ -4,14 +4,13 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const socketioLoader = require('./socketio.loader');
-const http = require('http');
 const { redisLoader } = require('./redis.loader');
 
 const app = express();
 app.use(cors());
+const server = require('http').createServer(app);
 
 // Socket.io
-const server = http.createServer(app);
 socketioLoader(server);
 
 // Redis
@@ -35,6 +34,6 @@ app.use('/api/v1/channels', ChannelRouter);
 app.use('/api/v1/messages', MessageRouter);
 
 //start server
-app.listen(PORT, async () => {
+server.listen(PORT, async () => {
     console.log(`Server is running at http://localhost:${PORT}`);
 });

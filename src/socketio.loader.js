@@ -1,34 +1,35 @@
 const jwt = require('jsonwebtoken');
 const ChannelService = require('./service/channel.service');
-const { Server } = require('socket.io');
 const { redisClient } = require('./redis.loader');
 const MessageService = require('./service/message.service');
 
 function socketioLoader(server) {
-    const io = new Server(server, {
+    /**
+     * @type {import('socket.io').Server}
+     */
+    const io = require('socket.io')(server, {
         cors: {
             origin: '*',
-            methods: ['GET', 'POST'],
+            credentials: true,
         },
     });
 
     // Middleware
     io.use(async (socket, next) => {
-        console.log(socket.handshake.query);
         const { accessToken } = socket.handshake.query;
 
         jwt.verify(accessToken, process.env.JWT_SECRET, (err, decoded) => {
             if (err) {
                 return next(new Error('Authentication error'));
             }
-            socket.userId = decoded;
+            socket.userId = decoded.id;
             return next();
         });
     });
 
     io.on('connection', async (socket) => {
         const userId = socket.userId;
-        console.log('New connection: ', socket._id);
+        console.log('New connection: ', userId);
 
         socket.on('joinVoiceChannel', async (channelId) => {
             const curChannel = await ChannelService.getChannelDetail(channelId);
@@ -88,7 +89,8 @@ function socketioLoader(server) {
             }
         });
 
-        socket.on('sendMessage', async (content, channelId) => {
+        socket.on('sendMessage', async ({ content, channelId }) => {
+            console.log({ content, channelId });
             const curChannel = await ChannelService.getChannelDetail(channelId);
 
             if (!channelId || !curChannel || !curChannel.userIds?.find((x) => x._id.toString() === userId)) {
@@ -98,7 +100,7 @@ function socketioLoader(server) {
 
             const newMessage = await MessageService.sendMessage(content, channelId, userId);
 
-            io.to(channelId).emit('new  Message', newMessage);
+            io.to(channelId).emit('newMessage', newMessage);
         });
 
         socket.on('disconnect', async () => {
