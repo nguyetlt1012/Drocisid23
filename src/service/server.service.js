@@ -1,6 +1,7 @@
 const { default: mongoose, SchemaType } = require('mongoose');
 const { OK, ERR } = require('../constant/index');
 const ChannelModel = require('../models/channel.model');
+const ChannelRoleGroupModel = require('../models/channelRoleGroup.model');
 const ServerModel = require('../models/server.model');
 const ServerRoleGroupModel = require('../models/serverRoleGroup.model');
 const UserModel = require('../models/user.model');
@@ -64,10 +65,17 @@ const ServerService = {
     delete: async(serverId, ownerId) => {
         try {
             const server = await ServerModel.deleteOne({
-                id: serverId,
+                _id: serverId,
                 ownerId: ownerId,
             })
             if(!server) throw new Error(`ServerId: ${serverId} or OwnerId: ${ownerId} is not matching`)
+            const channels = await ChannelModel.find({serverId: serverId});
+            console.log(channels)
+            channels.map(async(channel)=>{
+                await ChannelRoleGroupModel.deleteMany({channelId: channel._id});
+                await UserChannelRoleModel.deleteMany({channelId: channel._id});
+            })
+            await ChannelModel.deleteMany({serverId: serverId});
             return {
                 status: OK,
                 data: serverId
