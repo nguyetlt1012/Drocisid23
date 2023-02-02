@@ -64,10 +64,28 @@ const ServerService = {
     },
     delete: async(serverId, ownerId) => {
         try {
+<<<<<<< HEAD
             const server = await ServerModel.deleteOne({
                 _id: serverId,
+=======
+            // delete server
+            const server = await ServerModel.
+            deleteOne({
+                id: serverId,
+>>>>>>> origin
                 ownerId: ownerId,
             })
+            // delete all channel relevant
+            await ChannelModel.deleteMany({
+                serverId: serverId
+            })
+            // delete all role-group-server
+            await ServerRoleGroupModel.deleteMany({serverId: serverId})
+            // delete all role-user-server
+            await UserServerRoleModel.deleteMany({serverId:serverId})
+            // delete all role-group-channel
+            // await ChannelRoleGroupModel.deleteMany({})
+            // delete all role-user-channel
             if(!server) throw new Error(`ServerId: ${serverId} or OwnerId: ${ownerId} is not matching`)
             const channels = await ChannelModel.find({serverId: serverId});
             console.log(channels)
@@ -121,13 +139,20 @@ const ServerService = {
             
         }
     },
-    getByID: async (id) => {
+    getByID: async (id, userId) => {
         try {
+            // check is member
+            
             const server =  await ServerModel.findById(id)
+            if(!server.memberIDs.includes(userId))
+                throw new Error(`You are not a member of server: ${id}`)
+            if(!server) throw new Error(`Cant find Server with id: ${id}`)
             const channels = await ChannelModel.find({
                 serverId: id
             }, {
-                _id: 1
+                _id: 1,
+                name: 1,
+                type: 1
             })
             return {
                 status: OK,
@@ -202,7 +227,7 @@ const ServerService = {
         try {
             // before join, check if they was member of server
             const server = await ServerModel.findById(serverId)
-            if(server.memberIDs.includes(userId)) throw new Error(`User: ${userId} was a member of server`)
+            if(server.memberIDs.includes(userId)) throw new Error(`Cant joined server: User: ${userId} was a member of server`)
             server.memberIDs.push(userId)
             // if request list contain userId, remove it
             server.requestJoinUsers = server.requestJoinUsers.filter(item => item !== userId)
