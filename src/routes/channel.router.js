@@ -4,7 +4,7 @@ const ChannelController = require('../controllers/channel.controller');
 const ChannelRoleController = require('../controllers/channelRole.controller');
 const Authen = require('../middleware/authen');
 
-router.get('/getAll/:serverId', Authen.verifyToken, Authen.verifyPermission(serverPolicy.VIEW_CHANNEL), ChannelController.getAllByServer);
+router.get('/getAll/:serverId', Authen.verifyToken, Authen.verifyPermission(serverPolicy.READ_CHANNEL), ChannelController.getAllByServer);
 router.post('/', Authen.verifyToken, ChannelController.create);
 router.put('/:channelId', Authen.verifyToken, Authen.verifyPermission(channelPolicy.MANAGE_CHANNEL), ChannelController.update);
 router.delete('/:channelId', Authen.verifyToken, Authen.verifyPermission(channelPolicy.MANAGE_CHANNEL), ChannelController.delete );

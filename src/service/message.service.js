@@ -1,5 +1,6 @@
 const { ERR } = require("../constant");
 const { OK } = require("../constant/HttpStatus");
+const { deleteMessage } = require("../controllers/message.controller");
 const MessageModel = require("../models/message.model");
 
 
@@ -32,6 +33,22 @@ const MessageService = {
             return {
                 status: OK,
                 data: messages
+            }
+        } catch (error) {
+            return {
+                status: ERR,
+                data: error.message
+            }
+        }
+    },
+    deleteMessage: async (messageId) => {
+        try {
+            await MessageModel.deleteOne({
+                id: messageId
+            })
+            return {
+                status: OK,
+                data: "message is deleted"
             }
         } catch (error) {
             return {

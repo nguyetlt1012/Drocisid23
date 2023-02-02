@@ -30,6 +30,17 @@ const MessageController = {
                 _resp(res, error.httpStatus, error.apiStatus, error.message);
             } else _resp(res, httpStatus.INTERNAL_SERVER_ERROR, apiStatus.OTHER_ERROR, error.message);
         }
+    },
+    deleteMessage: async(req, res, next) => {
+        try {
+            const {status, data} = await MessageService.deleteMessage(req.params.messageId)
+            if(status === ERR) throw new CusError(apiStatus.DATABASE_ERROR, httpStatus.NOT_FOUND, data)
+            _resp(res, httpStatus.OK, apiStatus.SUCCESS, `Success!`, data);
+        } catch (error) {
+            if (error instanceof CusError) {
+                _resp(res, error.httpStatus, error.apiStatus, error.message);
+            } else _resp(res, httpStatus.INTERNAL_SERVER_ERROR, apiStatus.OTHER_ERROR, error.message);
+        }
     }
 }
 
