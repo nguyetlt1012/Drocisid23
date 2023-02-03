@@ -7,7 +7,7 @@ const socketioLoader = require('./socketio.loader');
 const { redisLoader } = require('./redis.loader');
 
 const app = express();
-app.use(cors());
+app.use(cors({credentials: true, origin: true}));
 const server = require('http').createServer(app);
 
 // Socket.io
