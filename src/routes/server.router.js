@@ -21,11 +21,7 @@ router.get('/get-servers-public', serverController.getServersPublic)
 router.get('/:serverId', Authen.verifyToken, serverController.getServerById);
 
 // router.get('/', serverController.getAllServer);
-<<<<<<< HEAD
-router.delete('/:id', Authen.verifyToken, serverController.deleteServer)
-=======
 router.delete('/:serverId', Authen.verifyToken, serverController.deleteServer)
->>>>>>> origin
 
 // create
 router.post('/', Authen.verifyToken,  serverController.createServer);

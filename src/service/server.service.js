@@ -64,36 +64,25 @@ const ServerService = {
     },
     delete: async(serverId, ownerId) => {
         try {
-<<<<<<< HEAD
-            const server = await ServerModel.deleteOne({
-                _id: serverId,
-=======
             // delete server
-            const server = await ServerModel.
-            deleteOne({
-                id: serverId,
->>>>>>> origin
-                ownerId: ownerId,
-            })
-            // delete all channel relevant
-            await ChannelModel.deleteMany({
-                serverId: serverId
-            })
+            const server = await ServerModel.findOneAndDelete({_id: serverId, ownerId: ownerId});
+            if(!server) throw new Error(`ServerId: ${serverId} or OwnerId: ${ownerId} is not matching`)
             // delete all role-group-server
             await ServerRoleGroupModel.deleteMany({serverId: serverId})
-            // delete all role-user-server
             await UserServerRoleModel.deleteMany({serverId:serverId})
+
             // delete all role-group-channel
             // await ChannelRoleGroupModel.deleteMany({})
             // delete all role-user-channel
-            if(!server) throw new Error(`ServerId: ${serverId} or OwnerId: ${ownerId} is not matching`)
             const channels = await ChannelModel.find({serverId: serverId});
-            console.log(channels)
+            // console.log(channels)
             channels.map(async(channel)=>{
                 await ChannelRoleGroupModel.deleteMany({channelId: channel._id});
                 await UserChannelRoleModel.deleteMany({channelId: channel._id});
             })
-            await ChannelModel.deleteMany({serverId: serverId});
+            await ChannelModel.deleteMany({
+                serverId: serverId
+            });
             return {
                 status: OK,
                 data: serverId
@@ -142,8 +131,8 @@ const ServerService = {
     getByID: async (id, userId) => {
         try {
             // check is member
-            
             const server =  await ServerModel.findById(id)
+            if (!server) throw new Error("Invalid server");
             if(!server.memberIDs.includes(userId))
                 throw new Error(`You are not a member of server: ${id}`)
             if(!server) throw new Error(`Cant find Server with id: ${id}`)
