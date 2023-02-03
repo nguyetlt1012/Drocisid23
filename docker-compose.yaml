@@ -1,0 +1,30 @@
+# Docker compose for redis and nodejs
+
+version: '3.1'
+
+services:
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./redis-data:/data
+    networks:
+      - drocsid23-network
+
+  nodejs:
+    build: .
+    env_file:
+      - .env
+    ports:
+      - "9999:9999"
+    depends_on:
+      - redis
+    volumes:
+      - .:/usr/src/app
+    networks:
+      - drocsid23-network
+
+networks:
+  drocsid23-network:
+    driver: bridge

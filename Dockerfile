@@ -1,13 +1,18 @@
-FROM node
+# Docker file for Nodejs
+# Version 1.0
+FROM node:18.14.0-alpine3.17
 
+# Set the working directory
 WORKDIR /app
 
-COPY package*.json .
+# Copy package.json and yarn.lock to the working directory
+COPY package.json yarn.lock ./
 
-RUN npm install
+# Install dependencies using Yarn
+RUN yarn install
 
-COPY .  /app
+# Copy the rest of the application files to the working directory
+COPY . .
 
-EXPOSE 3000
-
-CMD ["npm", "start"]
+# Specify the command to run when the container starts
+CMD [ "yarn", "start" ]

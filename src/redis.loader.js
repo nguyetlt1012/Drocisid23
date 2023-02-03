@@ -1,6 +1,9 @@
 const { createClient } = require('redis');
 
-const redisClient = createClient();
+const redisUrl = process.env.REDIS_URL || 'redis://localhost:6379';
+const redisClient = createClient({
+    url: redisUrl,
+});
 
 function redisLoader() {
     redisClient.on('error', (err) => {
