@@ -6,7 +6,7 @@ const MessageSchema = new Schema(
       type: String,
       require: true,
     },
-    author_id: {
+    author: {
       type: Schema.Types.ObjectId,
       ref: 'User',
       require: true,

@@ -96,7 +96,7 @@ const ChannelService = {
             if (!channel) throw new Error("invalid channel");
             const messages = await MessageModel.find({
                 channelId: channel.id
-            }).populate('author_id', 'fullname avatarUrl')
+            }).populate('author', 'fullname avatarUrl')
             return {
                 status: OK,
                 data: {

@@ -1,62 +1,65 @@
-const { ERR } = require("../constant");
-const { OK } = require("../constant/HttpStatus");
-const { deleteMessage } = require("../controllers/message.controller");
-const MessageModel = require("../models/message.model");
-
+const { ERR } = require('../constant');
+const { OK } = require('../constant/HttpStatus');
+const { deleteMessage } = require('../controllers/message.controller');
+const MessageModel = require('../models/message.model');
 
 const MessageService = {
     sendMessage: async (content, channelId, authorId) => {
         try {
-            const data = await MessageModel.create({
-                author_id: authorId,
+            const insertResult = await MessageModel.create({
+                author: authorId,
                 channelId: channelId,
-                content: content
-            })
+                content: content,
+            });
+            const message = await MessageModel.findById(insertResult._id).populate('author', 'fullname avatarUrl');
             return {
                 status: OK,
-                data: data
-            }
+                data: message,
+            };
         } catch (error) {
             return {
                 status: ERR,
-                data: error.message
+                data: error.message,
             };
         }
     },
     getAllMessages: async (channelId) => {
         try {
             const messages = await MessageModel.find({
-                channelId: channelId
-            }).sort({
-                $natural: 1
-            }).limit(20).populate('author_id', 'fullname avatarUrl')
+                channelId: channelId,
+            })
+                .sort({
+                    $natural: 1,
+                })
+                .limit(20)
+                .populate('author', 'fullname avatarUrl');
             return {
                 status: OK,
-                data: messages
-            }
+                data: messages,
+            };
         } catch (error) {
             return {
                 status: ERR,
-                data: error.message
-            }
+                data: error.message,
+            };
         }
     },
     deleteMessage: async (messageId) => {
         try {
             await MessageModel.deleteOne({
-                id: messageId
-            })
+                id: messageId,
+            });
             return {
                 status: OK,
-                data: "message is deleted"
-            }
+                data: 'message is deleted',
+            };
         } catch (error) {
             return {
                 status: ERR,
-                data: error.message
-            }
+                data: error.message,
+            };
         }
-    }
+    },
 };
 
-module.exports = MessageService
+module.exports = MessageService;

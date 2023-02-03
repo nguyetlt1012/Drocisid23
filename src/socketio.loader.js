@@ -2,6 +2,11 @@ const jwt = require('jsonwebtoken');
 const ChannelService = require('./service/channel.service');
 const { redisClient } = require('./redis.loader');
 const MessageService = require('./service/message.service');
+const UserService = require('./service/user.service');
+
+function arrayToSetArray(arr) {
+    return [...new Set(arr)];
+}
 
 function socketioLoader(server) {
     /**
@@ -31,33 +36,45 @@ function socketioLoader(server) {
         const userId = socket.userId;
         console.log('New connection: ', userId);
 
-        socket.on('joinVoiceChannel', async (channelId) => {
-            const curChannel = await ChannelService.getChannelDetail(channelId);
+        socket.on('joinChannel', async (channelId) => {
+            const channel = await ChannelService.getChannelDetail(channelId);
+            const user = await UserService.getById(userId);
 
-            if (!channelId || !curChannel || !curChannel.userIds?.find((x) => x._id.toString() === userId)) {
+            // Nếu không tồn tại channel hoặc user không có quyền vào channel
+            // if (!channelId || !channel || !channel.userIds?.find((x) => x._id.toString() === userId)) {
+            //     socket.emit('rejectToChannel');
+            //     return;
+            // }
+            if (!channelId || !channel) {
                 socket.emit('rejectToChannel');
                 return;
+            }
+
+            // Lấy channel từ cache
+            const cacheChannel = JSON.parse((await redisClient.get(`channels/${channel._id}`)) || 'null');
+            // Nếu đang join channel
+            if (cacheChannel) {
+                cacheChannel.listActiveUserId = cacheChannel.listActiveUserId.filter((x) => x !== socket.userId);
+                await redisClient.set(`channels/${channel._id}`, JSON.stringify(cacheChannel));
+            } else {
+                await redisClient.set(
+                    `channels/${channelId}`,
+                    JSON.stringify({
+                        listActiveUserId: arrayToSetArray([...(cacheChannel?.listActiveUserId || []), userId]),
+                    }),
+                );
             }
 
             socket.join(channelId);
             socket.channelId = channelId;
 
-            const cacheChannel = await redisClient.get(`channels/${channelId}`);
-            if (!cacheChannel) {
-                await redisClient.set(`channels/${channelId}`, JSON.stringify({ listActiveUserId: [userId] }));
-            } else {
-                const curCacheChannel = JSON.parse(cacheChannel);
-                curCacheChannel.listActiveUserId.push(userId);
-                await redisClient.set(`channels/${channelId}`, JSON.stringify(curCacheChannel));
-            }
-
             console.log('User joined: ', userId, channelId);
 
             // Return initial channel data
-            socket.emit('acceptToVoiceChannel', curChannel);
+            socket.emit('acceptToChannel', channel);
 
             // Emit to all user in channel that a new user joined
-            socket.to(channelId).emit('userJoinedVoiceChannel', curUser);
+            socket.to(channelId).emit('userJoinedChannel', user);
         });
 
         socket.on('setupPeer', ({ isInitiator, from, to, channelId, signal }) => {
@@ -67,22 +84,19 @@ function socketioLoader(server) {
             socket.to(channelId).emit('setupPeer', { isInitiator, from, to, channelId, signal });
         });
 
-        socket.on('leaveVoiceChannel', async () => {
-            const curChannel = await ChannelService.getChannelDetail(socket.channelId);
+        socket.on('leaveChannel', async () => {
+            const channel = await ChannelService.getChannelDetail(socket.channelId);
 
-            console.log('User leaveChannel: ', socket.userId, curChannel?._id);
-            socket.leave(curChannel?._id);
+            console.log('User leaveChannel: ', socket.userId, socket.channelId);
+            socket.leave(channel?._id);
 
-            if (curChannel) {
-                io.to(curChannel?._id).emit('userLeftVoiceChannel', socket.userId);
+            if (channel) {
+                io.to(channel?._id).emit('userLeftChannel', socket.userId);
 
-                const cacheChannel = await redisClient.get(`channels/${curChannel._id}`);
+                const cacheChannel = JSON.parse(await redisClient.get(`channels/${channel._id}`), 'null');
                 if (cacheChannel) {
-                    const curCacheChannel = JSON.parse(cacheChannel);
-                    curCacheChannel.listActiveUserId = curCacheChannel.listActiveUserId.filter(
-                        (x) => x !== socket.userId,
-                    );
-                    await redisClient.set(`channels/${curChannel._id}`, JSON.stringify(curCacheChannel));
+                    cacheChannel.listActiveUserId = cacheChannel.listActiveUserId.filter((x) => x !== socket.userId);
+                    await redisClient.set(`channels/${channel._id}`, JSON.stringify(cacheChannel));
                 } else {
                     console.log('Cache channel not found');
                 }
@@ -90,35 +104,36 @@ function socketioLoader(server) {
         });
 
         socket.on('sendMessage', async ({ content, channelId }) => {
-            console.log({ content, channelId });
+            console.log({ userId: socket.userId, content, channelId });
             const curChannel = await ChannelService.getChannelDetail(channelId);
 
-            if (!channelId || !curChannel || !curChannel.userIds?.find((x) => x._id.toString() === userId)) {
+            // if (!channelId || !curChannel || !curChannel.userIds?.find((x) => x._id.toString() === userId)) {
+            //     socket.emit('rejectToChannel');
+            //     return;
+            // }
+            if (!channelId || !curChannel) {
                 socket.emit('rejectToChannel');
                 return;
             }
 
             const newMessage = await MessageService.sendMessage(content, channelId, userId);
 
-            io.to(channelId).emit('newMessage', newMessage);
+            io.to(channelId).emit('newMessage', newMessage.data);
         });
 
         socket.on('disconnect', async () => {
-            const curChannel = await ChannelService.getChannelDetail(socket.channelId);
+            const channel = await ChannelService.getChannelDetail(socket.channelId);
 
-            console.log('User leaveChannel: ', socket.userId, curChannel?._id);
-            socket.leave(curChannel?._id);
+            console.log('User disconnect: ', socket.userId, socket.channelId);
+            socket.leave(channel?._id);
 
-            if (curChannel) {
-                io.to(curChannel?._id).emit('userLeftVoiceChannel', socket.userId);
+            if (channel) {
+                io.to(channel?._id).emit('userLeftChannel', socket.userId);
 
-                const cacheChannel = await redisClient.get(`channels/${curChannel._id}`);
+                const cacheChannel = JSON.parse(await redisClient.get(`channels/${channel._id}`), 'null');
                 if (cacheChannel) {
-                    const curCacheChannel = JSON.parse(cacheChannel);
-                    curCacheChannel.listActiveUserId = curCacheChannel.listActiveUserId.filter(
-                        (x) => x !== socket.userId,
-                    );
-                    await redisClient.set(`channels/${curChannel._id}`, JSON.stringify(curCacheChannel));
+                    cacheChannel.listActiveUserId = cacheChannel.listActiveUserId.filter((x) => x !== socket.userId);
+                    await redisClient.set(`channels/${channel._id}`, JSON.stringify(cacheChannel));
                 } else {
                     console.log('Cache channel not found');
                 }
