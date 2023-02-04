@@ -11,11 +11,11 @@ const ServerController = {
             // when user create server => update field severIds, 
             // create general channel
             // Check Params is required
-            const checkParams = await validate.checkParamRequest(req, ['name', 'description']);
+            const checkParams = await validate.checkParamRequest(req, ['name']);
             if (checkParams.status === ERR) {
                 throw new CusError(apiStatus.INVALID_PARAM, httpStatus.BAD_REQUEST, checkParams.message);
             }
-            const response = await ServerService.create(req.userId, req.body.name, req.body.description, req.body.isPublic);
+            const response = await ServerService.create(req.userId, req.body.name, req.body?.description, req.body.isPublic);
             if (response.status !== OK) {
                 throw new CusError(apiStatus.OTHER_ERROR, httpStatus.INTERNAL_SERVER_ERROR, response.data);
             }
@@ -39,7 +39,7 @@ const ServerController = {
     },
     updateServer: async (req, res, next) => {
         try {
-            const response = await ServerService.update(req.params.serverId, req.body.description, req.body.isPublic);
+            const response = await ServerService.update(req.params.serverId, req.body?.name, req.body?.description, req.body?.isPublic);
             if (response.status !== OK) {
                 throw new CusError(apiStatus.DATABASE_ERROR, httpStatus.NOT_FOUND, response.data);
             }

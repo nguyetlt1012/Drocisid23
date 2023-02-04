@@ -93,9 +93,10 @@ const ServerService = {
             }
         }
     },
-    update: async(serverId, description, isPublic) => {
+    update: async(serverId, name, description, isPublic) => {
         try {
             const server =  await ServerModel.findByIdAndUpdate(serverId, {
+                name,
                 description,
                 isPublic,
             })
