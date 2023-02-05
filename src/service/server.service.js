@@ -133,7 +133,9 @@ const ServerService = {
             // check is member
             
             const server =  await ServerModel.findById(id)
-            if(!server.memberIDs.includes(userId))
+                .populate('memberIDs', 'email fullname avatarUrl')
+            console.log(server, userId)
+            if(!server.memberIDs.find(x => x._id.toString() === userId))
                 throw new Error(`You are not a member of server: ${id}`)
             if(!server) throw new Error(`Cant find Server with id: ${id}`)
             const channels = await ChannelModel.find({

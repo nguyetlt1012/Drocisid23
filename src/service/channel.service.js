@@ -92,7 +92,7 @@ const ChannelService = {
     },
     getById: async (id) => {
         try {
-            const channel = await Channel.findById(id);
+            const channel = await Channel.findById(id).populate('userIds', 'fullname avatarUrl email');
             if (!channel) throw new Error("invalid channel");
             const messages = await MessageModel.find({
                 channelId: channel.id
