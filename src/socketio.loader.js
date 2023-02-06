@@ -37,11 +37,11 @@ function socketioLoader(server) {
         console.log('New connection: ', userId);
 
         socket.on('joinChannel', async (channelId) => {
-            const channel = await ChannelService.getChannelDetail(channelId);
+            const channel = await ChannelService.getChannelForSocketIO(channelId);
             const user = (await UserService.getById(userId)).data;
 
             // Nếu không tồn tại channel hoặc user không có quyền vào channel
-            // if (!channelId || !channel || !channel.userIds?.find((x) => x._id.toString() === userId)) {
+            // if (!channelId || !channel || !channel.users?.find((x) => x._id.toString() === userId)) {
             //     socket.emit('rejectToChannel');
             //     return;
             // }
@@ -113,9 +113,9 @@ function socketioLoader(server) {
 
         socket.on('sendMessage', async ({ content, channelId }) => {
             console.log({ userId: socket.userId, content, channelId });
-            const curChannel = await ChannelService.getChannelDetail(channelId);
+            const curChannel = await ChannelService.getChannelForSocketIO(channelId);
 
-            // if (!channelId || !curChannel || !curChannel.userIds?.find((x) => x._id.toString() === userId)) {
+            // if (!channelId || !curChannel || !curChannel.users?.find((x) => x._id.toString() === userId)) {
             //     socket.emit('rejectToChannel');
             //     return;
             // }

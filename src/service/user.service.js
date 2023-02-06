@@ -76,7 +76,7 @@ const UserService = {
             if(!server) throw new Error(`Can not find server with ID: ${serverId}`)
             
             // check user belonged to server ?
-            if(server.memberIDs.includes(userId)) throw new Error(`User was a member of server: ${serverId}`)
+            if(server.members.includes(userId)) throw new Error(`User was a member of server: ${serverId}`)
             // check if user requested join server
             if(server.requestJoinUsers.includes(userId)) throw new Error(`You already make a requested not long ago to join this server`)
             server.requestJoinUsers.push(userId);

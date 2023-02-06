@@ -57,7 +57,7 @@ const InviteService = {
             // get Channel and update memberIds
             const channel = await ChannelModel.findByIdAndUpdate(invite.source, {
                 $push: {
-                    userIds: userRequestId,
+                    users: userRequestId,
                 },
             });
         } else {

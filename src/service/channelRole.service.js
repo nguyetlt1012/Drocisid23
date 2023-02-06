@@ -15,7 +15,7 @@ const ChannelRoleGroupService = {
                 name: data.name,
                 channelId: data.channelId,
                 rolePolicies: roleServer.rolePolicies,
-                memberIds: roleServer.memberIds
+                memberIds: roleserver.members
             });
             if (!channelRoleGroup) throw new Error("Can't create channel role");
             return {
