@@ -112,9 +112,9 @@ const ChannelService = {
             };
         }
     },
-    getChannelDetail: async (channelId) => {
+    getChannelForSocketIO: async (channelId) => {
         try {
-            const channel = await Channel.findById(channelId).populate('users');
+            const channel = await Channel.findById(channelId).populate('users', 'fullname');
 
             return channel;
         } catch (error) {

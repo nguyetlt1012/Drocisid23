@@ -24,7 +24,7 @@ const createSendToken = (data, res) => {
 const AuthController = {
     signup: async (req, res, next) => {
         try {
-            const valid = await validate.checkParamRequest(req, ['fullname', 'email', 'phone', 'gender', 'password']);
+            const valid = await validate.checkParamRequest(req, ['fullname', 'email', 'password']);
             if (valid.status == ERR) {
                 throw new CusError(apiStatus.INVALID_PARAM, httpStatus.BAD_REQUEST, valid.message);
             }
