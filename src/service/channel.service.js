@@ -26,6 +26,7 @@ const ChannelService = {
             //     throw new Error('you can not permission for this action');
             // }
 
+            channel.users = [channel.userId];
             const newChannel = await Channel.create(channel);
             if (!newChannel) throw new Error("Can't create channel");
 
@@ -92,18 +93,18 @@ const ChannelService = {
     },
     getById: async (id) => {
         try {
-            const channel = await Channel.findById(id).populate('userIds', 'fullname avatarUrl email');
-            if (!channel) throw new Error("invalid channel");
+            const channel = await Channel.findById(id).populate('users', 'fullname avatarUrl email');
+            if (!channel) throw new Error('invalid channel');
             const messages = await MessageModel.find({
-                channelId: channel.id
-            }).populate('author', 'fullname avatarUrl')
+                channelId: channel.id,
+            }).populate('author', 'fullname avatarUrl');
             return {
                 status: OK,
                 data: {
                     ...channel._doc,
-                    messages
-                }
-            }
+                    messages,
+                },
+            };
         } catch (error) {
             return {
                 status: ERR,
@@ -113,7 +114,7 @@ const ChannelService = {
     },
     getChannelDetail: async (channelId) => {
         try {
-            const channel = await Channel.findById(channelId).populate('userIds');
+            const channel = await Channel.findById(channelId).populate('users');
 
             return channel;
         } catch (error) {

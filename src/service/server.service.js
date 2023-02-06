@@ -19,7 +19,7 @@ const ServerService = {
                 name,
                 description,
                 isPublic,
-                memberIDs: [ownerId]
+                members: [ownerId]
             });
             if(!newServer) throw new Error(`Cant create Server`)
             // update field serverIds in user
@@ -28,12 +28,13 @@ const ServerService = {
             //         serverIds: newServer.id
             //     }
             // })
+
             // create general Channal
             const generalChannel = ChannelService.create({
                 serverId: newServer.id,
                 name: `General`,
                 description: `General channel`,
-                userIds: [ownerId],
+                userId: ownerId,
                 type: 'text'
             })
 
@@ -133,8 +134,8 @@ const ServerService = {
             // check is member
             
             const server =  await ServerModel.findById(id)
-                .populate('memberIDs', 'email fullname avatarUrl')
-            if(!server.memberIDs.find(x => x._id.toString() === userId))
+                .populate('members', 'email fullname avatarUrl')
+            if(!server.members.find(x => x._id.toString() === userId))
                 throw new Error(`You are not a member of server: ${id}`)
             if(!server) throw new Error(`Cant find Server with id: ${id}`)
             const channels = await ChannelModel.find({
@@ -195,7 +196,7 @@ const ServerService = {
     getAllServerJoinedByUser: async (userId) => {
         try {
             const serverIds = await ServerModel.find({
-                memberIDs: {
+                members: {
                     $in: userId
                 }
             }, {
@@ -217,8 +218,8 @@ const ServerService = {
         try {
             // before join, check if they was member of server
             const server = await ServerModel.findById(serverId)
-            if(server.memberIDs.includes(userId)) throw new Error(`Cant joined server: User: ${userId} was a member of server`)
-            server.memberIDs.push(userId)
+            if(server.members.includes(userId)) throw new Error(`Cant joined server: User: ${userId} was a member of server`)
+            server.members.push(userId)
             // if request list contain userId, remove it
             server.requestJoinUsers = server.requestJoinUsers.filter(item => item !== userId)
             // find the everyone role server
@@ -226,6 +227,17 @@ const ServerService = {
                 serverId: serverId,
                 name: `everyone`,
             })
+
+            // Join all channels of server
+            const channels = await ChannelModel.find({
+                serverId: serverId
+            })
+            channels.forEach(channel => {
+                channel.users.push(userId)
+            })
+            //save
+            await Promise.all([server.save(), ...channels.map(channel => channel.save())]);
+
             const addToRoleEveryonePromise = await UserServerRoleModel.create({
                 serverId: serverId,
                 userId: userId,
@@ -247,11 +259,11 @@ const ServerService = {
             //     name: `general channel`
             // }, {
             //     $push: {
-            //         userIds: userId
+            //         users: userId
             //     }
             // })
             // await Promise.all([addToRoleEveryonePromise, server.save()])
-            await server.save();
+            // await server.save();
             return {
                 status: OK,
                 data: `UserId: ${userId} join server: ${serverId} success`
@@ -269,8 +281,8 @@ const ServerService = {
         try {
             const server = await ServerModel.findById(serverId);
             if(!server) throw new Error(`Server is not found by Id: ${serverId}`)
-            if(!server.memberIDs.includes(userId)) throw new Error(`User: ${userId} not be member of this server`)
-            server.memberIDs = server.memberIDs.filter(item => item !== userId)
+            if(!server.members.includes(userId)) throw new Error(`User: ${userId} not be member of this server`)
+            server.members = server.members.filter(item => item !== userId)
             const data = await server.save()
             // erase all role that user were
             const userRole = await UserServerRoleModel.deleteOne({
@@ -294,7 +306,7 @@ const ServerService = {
             const server = await ServerModel.findById(serverId)
             if(!server) throw new Error(`Cant find server with id: ${serverId}`)
             if(!server.requestJoinUsers.includes(userIdRequest)) throw new Error(`User: ${userIdRequest} is not request to join server: ${serverId}`)
-            server.requestJoinUsers = server.memberIDs.filter(item => item !== userIdRequest);
+            server.requestJoinUsers = server.members.filter(item => item !== userIdRequest);
             const data = await server.save();
             return {
                 status: OK,

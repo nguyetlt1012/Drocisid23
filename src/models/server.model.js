@@ -23,7 +23,7 @@ const ServerSchema = new Schema(
     inviteLinkIds: {
       type: Schema.Types.Array,
     },
-    memberIDs: {
+    members: {
       type: Schema.Types.Array,
       ref: 'User',
       require: true,

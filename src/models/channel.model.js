@@ -14,7 +14,7 @@ const ChannelSchema = new Schema(
       type: Boolean,
       default: false,
     },
-    userIds: {
+    users: {
       type: [Schema.Types.ObjectId],
       ref: 'User',
       default: [],
